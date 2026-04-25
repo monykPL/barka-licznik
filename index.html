@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strona monykPL</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body id="bg-body">
+
+    <div id="chat-container">
+        <div id="chat-messages">
+            <p><strong>System:</strong> Witaj na czacie!</p>
+        </div>
+        <div id="chat-input-area">
+            <input type="text" id="chat-input" placeholder="Napisz coś...">
+            <button onclick="sendMessage()">Wyślij</button>
+        </div>
+    </div>
+
+    <div id="center-content">
+        <h1 id="clock">00:00:00</h1>
+        <p id="author">made by: monykPL</p>
+    </div>
+
+    <audio id="barka-audio">
+        <source src="barka.mp3" type="audio/mpeg">
+    </audio>
+
+    <script src="script.js"></script>
+</body>
+</html>
