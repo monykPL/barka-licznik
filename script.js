@@ -30,30 +30,25 @@ function sendMessage() {
     }
 }
 
-// --- POPRAWIONE ODBLOKOWANIE I TEST ---
+// --- ODBLOKOWANIE DŹWIĘKU (Ciche) ---
 document.getElementById('test-audio-btn').onclick = function() {
     const audio = document.getElementById('barka-audio');
-    const btn = document.getElementById('test-audio-btn');
     
-    btn.innerText = "TESTOWANIE...";
-    
+    // Przeglądarka myśli, że puszczamy piosenkę...
     audio.play().then(() => {
-        // TERAZ SŁYSZYSZ DŹWIĘK PRZEZ 5 SEKUND
-        setTimeout(() => {
-            audio.pause();
-            audio.currentTime = 0;
-            document.getElementById('audio-unlocker').style.display = 'none';
-            
-            const messages = document.getElementById('chat-messages');
-            const systemMsg = document.createElement('p');
-            systemMsg.className = 'system-msg';
-            systemMsg.innerHTML = `<strong>System:</strong> Słyszałeś Barkę? Jeśli tak, to jutro o 21:37 zagra sama!`;
-            messages.appendChild(systemMsg);
-        }, 5000); // 5000ms = 5 sekund grania testowego
+        // ...ale my ją natychmiast pauzujemy, żeby czekała na 21:37!
+        audio.pause();
+        audio.currentTime = 0;
+        document.getElementById('audio-unlocker').style.display = 'none';
+        
+        const messages = document.getElementById('chat-messages');
+        const systemMsg = document.createElement('p');
+        systemMsg.className = 'system-msg';
+        systemMsg.innerHTML = `<strong>System:</strong> Czat i dźwięk odblokowane! Czekamy na 21:37.`;
+        messages.appendChild(systemMsg);
         
     }).catch(err => {
-        console.error(err);
-        alert("BŁĄD: Przeglądarka zablokowała plik lub go nie znalazła. Sprawdź czy barka.mp3 jest na GitHubie.");
+        alert("Błąd przeglądarki! Kliknij przycisk jeszcze raz.");
     });
 };
 
@@ -64,6 +59,7 @@ function update() {
 
     let target = new Date();
     target.setHours(21, 37, 0, 0);
+    // Jeśli jest po 21:37, celujemy w jutro
     if (now > target) target.setDate(target.getDate() + 1);
 
     const diff = target - now;
@@ -74,10 +70,10 @@ function update() {
     document.getElementById('countdown').innerText = 
         `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
 
-    // Aktywacja o 21:37:00
+    // Aktywacja dokładnie o 21:37:00
     if (now.getHours() === 21 && now.getMinutes() === 37 && now.getSeconds() === 0) {
         document.getElementById('bg-body').classList.add('yellow-mode');
-        document.getElementById('barka-audio').play();
+        document.getElementById('barka-audio').play(); // Tutaj Barka leci do końca!
     }
 }
 
