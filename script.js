@@ -44,7 +44,7 @@ document.getElementById('test-audio-btn').onclick = function() {
         const messages = document.getElementById('chat-messages');
         const systemMsg = document.createElement('p');
         systemMsg.className = 'system-msg';
-        systemMsg.innerHTML = `<strong>System:</strong> Czat i dźwięk odblokowane! Czekamy na 21:37.`;
+        systemMsg.innerHTML = `<strong>System:</strong> Dźwięk odblokowany. Poczekaj do godziny 21:37, aby zagrała pełna wersja!`;
         messages.appendChild(systemMsg);
         
     }).catch(err => {
