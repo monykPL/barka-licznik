@@ -1,5 +1,5 @@
 // ==========================================
-// 1. KONFIGURACJA TWOJEJ BAZY FIREBASE
+// 1. TWOJA KONFIGURACJA FIREBASE (BEZ ZMIAN)
 // ==========================================
 const firebaseConfig = {
   apiKey: "AIzaSyDgn4ux6ZJyFbxbG-aB-kv9GjNqfPJUiSw",
@@ -12,84 +12,96 @@ const firebaseConfig = {
   measurementId: "G-SZ8E653FZW"
 };
 
-// Inicjalizacja połączenia z Google Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 // ==========================================
-// 2. LOGIKA CZATU NA ŻYWO (SYNCHRONIZACJA)
+// 2. FUNKCJA CZYSZCZENIA STARYCH WIADOMOŚCI (NOWOŚĆ)
+// ==========================================
+function cleanupChat() {
+    const now = Date.now();
+    const oneHour = 60 * 60 * 1000; // 60 minut w milisekundach
+
+    db.ref("wiadomosci").once("value", (snapshot) => {
+        snapshot.forEach((childSnapshot) => {
+            const msg = childSnapshot.val();
+            // Jeśli wiadomość jest starsza niż godzina, usuń ją
+            if (now - msg.czas > oneHour) {
+                childSnapshot.ref.remove();
+            }
+        });
+    });
+}
+
+// ==========================================
+// 3. LOGIKA CZATU NA ŻYWO
 // ==========================================
 
-// Słuchacz bazy danych: gdy ktokolwiek doda wiadomość, pojawi się ona u wszystkich
-db.ref("wiadomosci").limitToLast(50).on("child_added", function(snapshot) {
+// Wyświetlanie wiadomości
+db.ref("wiadomosci").limitToLast(50).on("child_added", (snapshot) => {
     const dane = snapshot.val();
     const messages = document.getElementById('chat-messages');
     
     const msg = document.createElement('p');
     msg.style.margin = "5px 0";
     msg.style.wordBreak = "break-word";
-    // Każda wiadomość będzie podpisana jako "Anonim"
     msg.innerHTML = `<strong>Anonim:</strong> ${dane.tekst}`;
     
     messages.appendChild(msg);
-    messages.scrollTop = messages.scrollHeight; // Auto-przewijanie do najnowszej wiadomości
+    messages.scrollTop = messages.scrollHeight;
 });
 
-// Funkcja wysyłania wiadomości do bazy
+// Wysyłanie wiadomości
 function sendMessage() {
     const input = document.getElementById('chat-input');
     if (input.value.trim() !== "") {
-        // Wysyłanie tekstu do bazy danych w chmurze
+        cleanupChat(); // Posprzątaj przy okazji wysyłania
         db.ref("wiadomosci").push({
             tekst: input.value,
             czas: Date.now()
         });
-        input.value = ""; // Czyszczenie pola po wysłaniu
+        input.value = "";
     }
 }
 
-// Obsługa wysyłania klawiszem ENTER
+// Obsługa ENTER
 document.addEventListener('DOMContentLoaded', () => {
     const input = document.getElementById('chat-input');
     if(input) {
-        input.addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') {
-                sendMessage();
-            }
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
         });
     }
 });
 
 // ==========================================
-// 3. SYSTEM ZEGARA, ODLICZANIA I BARKI
+// 4. SYSTEM ZEGARA, ODLICZANIA I BARKI
 // ==========================================
 
 window.onload = function() {
+    cleanupChat(); // Posprzątaj zaraz po wejściu na stronę
+    
     const messages = document.getElementById('chat-messages');
     const systemMsg = document.createElement('p');
     systemMsg.className = 'system-msg';
-    systemMsg.innerHTML = `<strong>System:</strong> Połączono z czatem na żywo.`;
+    systemMsg.innerHTML = `<strong>System:</strong> Połączono. Wiadomości starsze niż 1h są usuwane.`;
     messages.appendChild(systemMsg);
 };
 
 function updateEverything() {
     const now = new Date();
     
-    // 1. Mały zegarek przy czacie
+    // Mały zegarek
     const h = String(now.getHours()).padStart(2, '0');
     const m = String(now.getMinutes()).padStart(2, '0');
     const s = String(now.getSeconds()).padStart(2, '0');
     const smallClock = document.getElementById('small-clock');
     if(smallClock) smallClock.innerText = `${h}:${m}:${s}`;
 
-    // 2. Odliczanie do 21:37
+    // Odliczanie do 21:37
     let target = new Date();
     target.setHours(21, 37, 0, 0);
-
-    // Jeśli już po 21:37, ustaw cel na jutro
-    if (now > target) {
-        target.setDate(target.getDate() + 1);
-    }
+    if (now > target) target.setDate(target.getDate() + 1);
 
     const diff = target - now;
     const hours = Math.floor(diff / (1000 * 60 * 60));
@@ -102,7 +114,7 @@ function updateEverything() {
             `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
     }
 
-    // 3. Sprawdzenie godziny zero (21:37:00)
+    // 21:37:00 - Aktywacja
     if (now.getHours() === 21 && now.getMinutes() === 37 && now.getSeconds() === 0) {
         activatePapalMode();
     }
@@ -114,12 +126,9 @@ function activatePapalMode() {
     
     if(body) body.classList.add('yellow-mode');
     if(audio) {
-        audio.play().catch(() => {
-            console.log("Kliknij na stronę, by odblokować dźwięk!");
-        });
+        audio.play().catch(() => console.log("Kliknij na stronę!"));
     }
 }
 
-// Odświeżanie co sekundę
 setInterval(updateEverything, 1000);
 updateEverything();
