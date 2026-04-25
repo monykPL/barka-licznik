@@ -1,5 +1,5 @@
 // ==========================================
-// 1. TWOJA KONFIGURACJA FIREBASE (BEZ ZMIAN)
+// 1. TWOJA KONFIGURACJA FIREBASE (Wklejona automatycznie)
 // ==========================================
 const firebaseConfig = {
   apiKey: "AIzaSyDgn4ux6ZJyFbxbG-aB-kv9GjNqfPJUiSw",
@@ -12,20 +12,20 @@ const firebaseConfig = {
   measurementId: "G-SZ8E653FZW"
 };
 
+// Inicjalizacja Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 // ==========================================
-// 2. FUNKCJA CZYSZCZENIA STARYCH WIADOMOŚCI (NOWOŚĆ)
+// 2. FUNKCJA CZYSZCZENIA CZATU (Starsze niż 1h)
 // ==========================================
 function cleanupChat() {
     const now = Date.now();
-    const oneHour = 60 * 60 * 1000; // 60 minut w milisekundach
+    const oneHour = 60 * 60 * 1000; // 60 minut
 
     db.ref("wiadomosci").once("value", (snapshot) => {
         snapshot.forEach((childSnapshot) => {
             const msg = childSnapshot.val();
-            // Jeśli wiadomość jest starsza niż godzina, usuń ją
             if (now - msg.czas > oneHour) {
                 childSnapshot.ref.remove();
             }
@@ -37,7 +37,7 @@ function cleanupChat() {
 // 3. LOGIKA CZATU NA ŻYWO
 // ==========================================
 
-// Wyświetlanie wiadomości
+// Słuchacz bazy: wyświetl wiadomość jak ktoś napisze
 db.ref("wiadomosci").limitToLast(50).on("child_added", (snapshot) => {
     const dane = snapshot.val();
     const messages = document.getElementById('chat-messages');
@@ -48,14 +48,14 @@ db.ref("wiadomosci").limitToLast(50).on("child_added", (snapshot) => {
     msg.innerHTML = `<strong>Anonim:</strong> ${dane.tekst}`;
     
     messages.appendChild(msg);
-    messages.scrollTop = messages.scrollHeight;
+    messages.scrollTop = messages.scrollHeight; // Auto-scroll
 });
 
-// Wysyłanie wiadomości
+// Funkcja wysyłania
 function sendMessage() {
     const input = document.getElementById('chat-input');
     if (input.value.trim() !== "") {
-        cleanupChat(); // Posprzątaj przy okazji wysyłania
+        cleanupChat(); // Posprzątaj przy okazji
         db.ref("wiadomosci").push({
             tekst: input.value,
             czas: Date.now()
@@ -64,7 +64,7 @@ function sendMessage() {
     }
 }
 
-// Obsługa ENTER
+// Obsługa klawisza ENTER
 document.addEventListener('DOMContentLoaded', () => {
     const input = document.getElementById('chat-input');
     if(input) {
@@ -75,17 +75,44 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ==========================================
-// 4. SYSTEM ZEGARA, ODLICZANIA I BARKI
+// 4. NOWOŚĆ: TESTOWANIE I ODBLOKOWYWANIE DŹWIĘKU
+// ==========================================
+document.getElementById('test-audio-btn').addEventListener('click', function() {
+    testAudio();
+});
+
+function testAudio() {
+    const audio = document.getElementById('barka-audio');
+    const btn = document.getElementById('test-audio-btn');
+    
+    // Próba odtworzenia dźwięku
+    audio.play().then(() => {
+        // Jeśli się udało, dźwięk jest ODBLOKOWANY.
+        alert("Dźwięk przetestowany. Baza danych została połączona.");
+        // Ukrywamy przycisk, bo już nie jest potrzebny
+        btn.style.display = 'none';
+        
+        // Wykonujemy połączenie systemowe w czacie
+        const messages = document.getElementById('chat-messages');
+        const systemMsg = document.createElement('p');
+        systemMsg.className = 'system-msg';
+        systemMsg.innerHTML = `<strong>System:</strong> Połączono z czatem. Odblokowano dźwięk.`;
+        messages.appendChild(systemMsg);
+        
+    }).catch((error) => {
+        // Jeśli się nie udało (np. brak pliku)
+        console.log("Błąd testu audio:", error);
+        alert("Dźwięk nie działa! Sprawdź czy plik 'barka.mp3' jest na GitHubie.");
+    });
+}
+
+
+// ==========================================
+// 5. SYSTEM ZEGARA, ODLICZANIA I BARKI
 // ==========================================
 
 window.onload = function() {
-    cleanupChat(); // Posprzątaj zaraz po wejściu na stronę
-    
-    const messages = document.getElementById('chat-messages');
-    const systemMsg = document.createElement('p');
-    systemMsg.className = 'system-msg';
-    systemMsg.innerHTML = `<strong>System:</strong> Połączono. Wiadomości starsze niż 1h są usuwane.`;
-    messages.appendChild(systemMsg);
+    cleanupChat(); // Posprzątaj czat po wejściu
 };
 
 function updateEverything() {
@@ -126,9 +153,15 @@ function activatePapalMode() {
     
     if(body) body.classList.add('yellow-mode');
     if(audio) {
-        audio.play().catch(() => console.log("Kliknij na stronę!"));
+        // Ponieważ dźwięk został odblokowany przyciskiem testowym, to zadziała!
+        audio.play().catch(() => {
+            // Plan awaryjny - jeśli kliknięcie testowe zawiodło
+            alert("Barka powinna grać! Kliknij 'OK' aby ją włączyć.");
+            audio.play();
+        });
     }
 }
 
+// Pętla odświeżająca
 setInterval(updateEverything, 1000);
 updateEverything();
