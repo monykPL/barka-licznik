@@ -1,131 +1,44 @@
 body {
-    margin: 0;
-    padding: 0;
-    height: 100vh;
-    display: flex;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #333; /* Początkowe szare tło */
-    color: white;
-    transition: background-color 1.5s ease;
-    overflow: hidden;
+    margin: 0; padding: 0; height: 100vh; display: flex;
+    font-family: 'Segoe UI', sans-serif; background-color: #333; color: white;
+    transition: background-color 1.5s ease; overflow: hidden;
 }
 
-/* Klasa aktywowana o 21:37 */
-.yellow-mode {
-    background-color: #ffeb3b !important;
-    color: black !important;
+.yellow-mode { background-color: #ffeb3b !important; color: black !important; }
+
+/* CZAT */
+#chat-container { width: 350px; background: rgba(0, 0, 0, 0.4); display: flex; flex-direction: column; border-right: 1px solid #444; }
+#chat-messages { flex-grow: 1; padding: 20px; overflow-y: auto; font-size: 14px; }
+.system-msg { color: #00ff00; font-style: italic; margin-bottom: 15px; border-bottom: 1px solid #555; padding-bottom: 5px; }
+#chat-input-area { display: flex; align-items: center; padding: 15px; background: #222; gap: 8px; }
+#chat-input { flex-grow: 1; padding: 8px; border: 1px solid #444; background: #111; color: white; border-radius: 4px; }
+#small-clock { font-size: 11px; color: #888; font-family: monospace; min-width: 55px; }
+
+/* ŚRODEK */
+#center-content { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+#countdown { font-size: clamp(50px, 10vw, 120px); margin: 10px 0; font-family: monospace; font-weight: bold; }
+#author { margin-top: 20px; opacity: 0.6; }
+
+/* PRZYCISK W PRAWYM GÓRNYM ROGU */
+#audio-unlocker {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+    text-align: right;
 }
 
-/* Panel czatu */
-#chat-container {
-    width: 350px;
-    background: rgba(0, 0, 0, 0.4);
-    display: flex;
-    flex-direction: column;
-    border-right: 1px solid #444;
-}
-
-#chat-messages {
-    flex-grow: 1;
-    padding: 20px;
-    overflow-y: auto;
-    font-size: 14px;
-}
-
-.system-msg {
-    color: #bbb;
-    font-style: italic;
-    margin-bottom: 15px;
-    border-bottom: 1px solid #555;
-    padding-bottom: 5px;
-}
-
-#chat-input-area {
-    display: flex;
-    align-items: center;
-    padding: 15px;
-    background: #222;
-    gap: 8px;
-}
-
-#chat-input {
-    flex-grow: 1;
-    padding: 8px;
-    border: 1px solid #444;
-    background: #111;
-    color: white;
-    border-radius: 4px;
-}
-
-button {
-    padding: 8px 15px;
-    cursor: pointer;
-    background: #444;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    transition: background 0.3s;
-}
-
-button:hover {
-    background: #555;
-}
-
-#small-clock {
-    font-size: 11px;
-    color: #888;
-    font-family: monospace;
-    min-width: 55px;
-}
-
-/* Środkowa sekcja */
-#center-content {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-}
-
-.label {
-    font-size: 1.2rem;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    margin: 0;
-    opacity: 0.7;
-}
-
-#countdown {
-    font-size: clamp(50px, 10vw, 120px);
-    margin: 10px 0;
-    font-family: 'Courier New', Courier, monospace;
-    font-weight: bold;
-}
-
-#author {
-    font-size: 1.1rem;
-    margin-top: 20px;
-    border-top: 1px solid rgba(255,255,255,0.2);
-    padding-top: 10px;
-    margin-bottom: 30px;
-}
-
-.yellow-mode #author {
-    border-top: 1px solid rgba(0,0,0,0.2);
-}
-
-/* STYL DLA NOWEGO PRZYCISKU TESTOWEGO */
 #test-audio-btn {
-    padding: 15px 30px;
-    font-size: 18px;
-    background-color: #ff9800; /* Pomarańczowy, żeby się wyróżniał */
+    padding: 12px 20px;
+    font-size: 14px;
+    background-color: #ff9800;
     color: black;
+    border: 2px solid white;
     border-radius: 8px;
+    cursor: pointer;
     font-weight: bold;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    transition: transform 0.2s;
 }
 
-#test-audio-btn:hover {
-    background-color: #ffb74d;
-}
+#test-audio-btn:hover { transform: scale(1.1); background-color: #ffa726; }
