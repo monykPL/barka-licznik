@@ -108,8 +108,24 @@ button:hover {
     margin-top: 20px;
     border-top: 1px solid rgba(255,255,255,0.2);
     padding-top: 10px;
+    margin-bottom: 30px;
 }
 
 .yellow-mode #author {
     border-top: 1px solid rgba(0,0,0,0.2);
+}
+
+/* STYL DLA NOWEGO PRZYCISKU TESTOWEGO */
+#test-audio-btn {
+    padding: 15px 30px;
+    font-size: 18px;
+    background-color: #ff9800; /* Pomarańczowy, żeby się wyróżniał */
+    color: black;
+    border-radius: 8px;
+    font-weight: bold;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+}
+
+#test-audio-btn:hover {
+    background-color: #ffb74d;
 }
