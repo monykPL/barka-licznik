@@ -12,7 +12,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// CZAT
+// --- CZAT ---
 db.ref("wiadomosci").limitToLast(50).on("child_added", (snapshot) => {
     const dane = snapshot.val();
     const messages = document.getElementById('chat-messages');
@@ -30,25 +30,34 @@ function sendMessage() {
     }
 }
 
-// ODBLOKOWANIE (PRZYCISK W ROGU)
+// --- POPRAWIONE ODBLOKOWANIE I TEST ---
 document.getElementById('test-audio-btn').onclick = function() {
     const audio = document.getElementById('barka-audio');
+    const btn = document.getElementById('test-audio-btn');
+    
+    btn.innerText = "TESTOWANIE...";
+    
     audio.play().then(() => {
-        audio.pause();
-        audio.currentTime = 0;
-        document.getElementById('audio-unlocker').style.display = 'none'; // Przycisk znika
+        // TERAZ SŁYSZYSZ DŹWIĘK PRZEZ 5 SEKUND
+        setTimeout(() => {
+            audio.pause();
+            audio.currentTime = 0;
+            document.getElementById('audio-unlocker').style.display = 'none';
+            
+            const messages = document.getElementById('chat-messages');
+            const systemMsg = document.createElement('p');
+            systemMsg.className = 'system-msg';
+            systemMsg.innerHTML = `<strong>System:</strong> Słyszałeś Barkę? Jeśli tak, to jutro o 21:37 zagra sama!`;
+            messages.appendChild(systemMsg);
+        }, 5000); // 5000ms = 5 sekund grania testowego
         
-        const messages = document.getElementById('chat-messages');
-        const systemMsg = document.createElement('p');
-        systemMsg.className = 'system-msg';
-        systemMsg.innerHTML = `<strong>System:</strong> Dźwięk odblokowany!`;
-        messages.appendChild(systemMsg);
     }).catch(err => {
-        alert("Błąd! Kliknij jeszcze raz, aby przeglądarka zezwoliła na dźwięk.");
+        console.error(err);
+        alert("BŁĄD: Przeglądarka zablokowała plik lub go nie znalazła. Sprawdź czy barka.mp3 jest na GitHubie.");
     });
 };
 
-// ODLICZANIE
+// --- ODLICZANIE ---
 function update() {
     const now = new Date();
     document.getElementById('small-clock').innerText = now.toLocaleTimeString();
@@ -65,6 +74,7 @@ function update() {
     document.getElementById('countdown').innerText = 
         `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
 
+    // Aktywacja o 21:37:00
     if (now.getHours() === 21 && now.getMinutes() === 37 && now.getSeconds() === 0) {
         document.getElementById('bg-body').classList.add('yellow-mode');
         document.getElementById('barka-audio').play();
