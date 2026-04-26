@@ -1,50 +1,110 @@
+/* GŁÓWNE USTAWIENIA STRONY */
 body {
-    background-color: #2c3e50;
+    background-color: #2c2f33;
     color: white;
-    font-family: sans-serif;
-    text-align: center;
+    font-family: Arial, sans-serif;
     margin: 0;
-    padding: 20px;
+    overflow: hidden; 
 }
 
-#timer {
-    font-size: 70px;
+/* WŁĄCZA ŻÓŁTE TŁO - zostaje nawet po wyłączeniu imprezy */
+.yellow-mode {
+    background-color: #f1c40f !important;
+    color: black !important;
+}
+
+/* EFEKT MIGANIA (STROBOSKOP) */
+.party-mode {
+    animation: flash 0.15s infinite !important;
+    transition: none !important;
+}
+
+@keyframes flash {
+    0% { background-color: #f1c40f; }
+    50% { background-color: #ffffff; }
+    100% { background-color: #f1c40f; }
+}
+
+/* KONTROLKI W PRAWYM GÓRNYM ROGU */
+#top-controls {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    gap: 15px;
+    align-items: flex-start;
+    z-index: 100;
+}
+
+#audio-unlocker {
+    text-align: center;
+}
+
+#test-audio-btn, #epilepsy-btn, #chat-input-area button {
+    padding: 10px 15px;
+    font-size: 12px;
     font-weight: bold;
-    margin: 20px 0;
-}
-
-#party-btn {
-    padding: 15px 40px;
-    font-size: 20px;
+    border-radius: 8px;
     cursor: pointer;
-    background: #e74c3c;
-    color: white;
-    border: none;
-    border-radius: 10px;
-    margin-bottom: 30px;
+    border: 2px solid white;
 }
 
-.chat-container {
-    max-width: 500px;
-    margin: 0 auto;
-    background: rgba(0,0,0,0.3);
-    padding: 15px;
-    border-radius: 10px;
+#test-audio-btn { background-color: #d35400; color: white; }
+#epilepsy-btn { background-color: #555; color: white; transition: background-color 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+.small-info { font-size: 11px; color: #aaa; margin-top: 5px; }
+
+/* ODLICZANIE NA ŚRODKU */
+#center-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
 }
 
-#chat-box {
+#countdown { font-size: 5rem; margin: 10px 0; }
+#author { font-size: 0.8rem; color: #aaa; }
+
+/* CZAT */
+#chat-container {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    width: 300px;
+    background: rgba(0,0,0,0.7);
+    border-radius: 10px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 100;
+}
+
+#chat-messages {
     height: 200px;
-    background: white;
-    color: black;
     overflow-y: auto;
-    margin-bottom: 10px;
-    text-align: left;
-    padding: 10px;
-    border-radius: 5px;
+    font-size: 14px;
+    word-wrap: break-word;
 }
 
-input {
-    padding: 10px;
+#chat-messages p { margin: 5px 0; }
+.system-msg { color: #f1c40f; font-weight: bold; }
+
+#chat-input-area {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+
+#chat-input {
+    flex-grow: 1;
+    padding: 5px;
     border-radius: 5px;
     border: none;
+}
+
+#small-clock {
+    font-size: 12px;
+    color: #aaa;
+    margin-left: 5px;
 }
