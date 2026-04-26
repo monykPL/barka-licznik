@@ -7,16 +7,16 @@ body {
     overflow: hidden; 
 }
 
-/* WŁĄCZA ŻÓŁTE TŁO O 21:37 */
+/* WŁĄCZA ŻÓŁTE TŁO - zostaje nawet po wyłączeniu imprezy */
 .yellow-mode {
-    background-color: #f1c40f; /* USUNĄŁEM !important */
-    color: black;
+    background-color: #f1c40f !important;
+    color: black !important;
 }
 
 /* EFEKT MIGANIA (STROBOSKOP) */
 .party-mode {
-    animation: flash 0.15s infinite; /* USUNĄŁEM !important */
-    transition: none; 
+    animation: flash 0.15s infinite !important;
+    transition: none !important;
 }
 
 @keyframes flash {
@@ -65,7 +65,7 @@ body {
 #countdown { font-size: 5rem; margin: 10px 0; }
 #author { font-size: 0.8rem; color: #aaa; }
 
-/* CZAT W LEWYM DOLNYM ROGU */
+/* CZAT */
 #chat-container {
     position: absolute;
     bottom: 20px;
@@ -88,7 +88,7 @@ body {
 }
 
 #chat-messages p { margin: 5px 0; }
-.system-msg { color: #f1c40f; }
+.system-msg { color: #f1c40f; font-weight: bold; }
 
 #chat-input-area {
     display: flex;
