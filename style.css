@@ -14,15 +14,26 @@ body {
     color: black;
 }
 
-/* EFEKT MIGANIA (STROBOSKOP) */
+/* EFEKT MIGANIA (STROBOSKOP) - PODMIEŃ TO */
 .party-mode {
-    animation: flash 0.3s infinite !important;
+    animation: flash 0.15s infinite !important; /* Przyspieszyłem dla lepszego efektu imprezy */
+    -webkit-animation: flash 0.15s infinite !important;
 }
 
 @keyframes flash {
-    0% { background-color: #ffeb3b; }
-    50% { background-color: #ffffff; }
-    100% { background-color: #ffeb3b; }
+    0% { background-color: #f1c40f !important; }
+    50% { background-color: #ffffff !important; }
+    100% { background-color: #f1c40f !important; }
+}
+
+/* Upewnij się, że body ma transition, żeby nie było lagów */
+body {
+    background-color: #2c2f33;
+    color: white;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    overflow: hidden;
+    transition: background-color 0.1s linear; /* Szybsza reakcja na zmianę koloru */
 }
 
 /* KONTROLKI W PRAWYM GÓRNYM ROGU */
