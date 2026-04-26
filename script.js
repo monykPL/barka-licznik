@@ -43,7 +43,6 @@ function sendMessage() {
 // --- NOWY PRZYCISK: EPILEPSJA / IMPREZA ---
 document.getElementById('epilepsy-btn').onclick = function() {
     if (!isPartyMode) {
-        // Okienko ostrzegawcze
         let zgoda = confirm("⚠️ OSTRZEŻENIE ⚠️\n\nWłączenie tej opcji spowoduje intensywne, szybkie miganie tła podczas utworu. Może to wywołać atak u osób cierpiących na padaczkę fotogenną.\n\nCzy na pewno chcesz włączyć tryb imprezowy?");
         
         if (zgoda) {
@@ -52,13 +51,12 @@ document.getElementById('epilepsy-btn').onclick = function() {
             this.style.backgroundColor = "red";
             this.style.color = "white";
             
-            // Jeśli muzyka właśnie gra, odpal miganie od razu
+            // Jeśli Barka gra w tym momencie, odpal od razu
             if (document.getElementById('bg-body').classList.contains('yellow-mode')) {
                 document.getElementById('bg-body').classList.add('party-mode');
             }
         }
     } else {
-        // Wyłączanie
         isPartyMode = false;
         this.innerText = "IMPREZA: WYŁĄCZONA";
         this.style.backgroundColor = "#555";
@@ -77,7 +75,6 @@ document.getElementById('test-audio-btn').onclick = function() {
         setTimeout(() => {
             audio.pause();
             audio.currentTime = 0;
-            // Ukrywamy cały div z przyciskiem testowania
             document.getElementById('audio-unlocker').style.display = 'none';
             
             const messages = document.getElementById('chat-messages');
@@ -91,7 +88,7 @@ document.getElementById('test-audio-btn').onclick = function() {
 
 // --- LOGIKA IMPREZY I POWROTU TŁA ---
 function startConfetti() {
-    // Strzela co 250 milisekund z lewego i prawego rogu
+    if (confettiInterval) clearInterval(confettiInterval);
     confettiInterval = setInterval(() => {
         confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0, y: 1 }, zIndex: 9999 });
         confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1, y: 1 }, zIndex: 9999 });
@@ -99,12 +96,14 @@ function startConfetti() {
 }
 
 function stopConfetti() {
-    clearInterval(confettiInterval);
+    if (confettiInterval) {
+        clearInterval(confettiInterval);
+        confettiInterval = null;
+    }
 }
 
 // Gdy Barka się skończy:
 document.getElementById('barka-audio').onended = function() {
-    // Usuwa żółte tło i stroboskop, wracając do domyślnego
     document.getElementById('bg-body').classList.remove('yellow-mode', 'party-mode');
     stopConfetti();
 };
@@ -113,19 +112,15 @@ function activatePapalMode() {
     const audio = document.getElementById('barka-audio');
     const bg = document.getElementById('bg-body');
     
-    // Najpierw dodajemy żółte tło
     bg.classList.add('yellow-mode');
-    
-    // Jeśli opcja imprezy jest włączona, dodajemy miganie
     if (isPartyMode) {
-        console.log("Tryb imprezy aktywny!"); // Zobaczysz to w konsoli (F12)
         bg.classList.add('party-mode');
     }
     
     startConfetti();
     
     audio.currentTime = 0;
-    audio.play().catch(err => console.log("Błąd autostartu: ", err));
+    audio.play().catch(e => console.error("Audio error:", e));
 }
 
 // --- LOGIKA CZASU ---
