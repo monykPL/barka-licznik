@@ -7,16 +7,9 @@ body {
     overflow: hidden; 
 }
 
-/* WŁĄCZA ŻÓŁTE TŁO - zostaje nawet po wyłączeniu imprezy */
-.yellow-mode {
-    background-color: #f1c40f !important;
-    color: black !important;
-}
-
-/* EFEKT MIGANIA (STROBOSKOP) */
+/* EFEKT MIGANIA */
 .party-mode {
-    /* Wymuszamy animację nad wszystkimi innymi tłami */
-    animation: flash 0.1s infinite !important; 
+    animation: flash 0.1s infinite !important;
     transition: none !important;
 }
 
@@ -24,6 +17,11 @@ body {
     0% { background-color: #f1c40f !important; }
     50% { background-color: #ffffff !important; }
     100% { background-color: #f1c40f !important; }
+}
+
+/* ŻÓŁTE TŁO */
+.yellow-mode {
+    background-color: #f1c40f !important;
 }
 
 /* KONTROLKI W PRAWYM GÓRNYM ROGU */
