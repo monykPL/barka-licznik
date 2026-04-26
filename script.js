@@ -1,9 +1,7 @@
-// --- USTAWIENIA ---
 let strobeInterval = null;
 let confettiInterval = null;
 let isPartyMode = false;
 
-// Twoja konfiguracja Firebase (Czat)
 const firebaseConfig = {
     apiKey: "AIzaSyDgn4ux6ZJyFbxbG-aB-kv9GjNqfPJUiSw",
     authDomain: "monyk-czat.firebaseapp.com",
@@ -17,12 +15,11 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// --- FUNKCJA STARTUJĄCA IMPREZĘ ---
-window.startBarkaEffect = function() {
+// --- START EFEKTÓW ---
+function startBarkaEffect() {
     const audio = document.getElementById('barka-audio');
-    
-    // Tworzymy warstwę migającą, jeśli jej nie ma
     let overlay = document.getElementById('party-overlay');
+    
     if (!overlay) {
         overlay = document.createElement('div');
         overlay.id = 'party-overlay';
@@ -30,44 +27,56 @@ window.startBarkaEffect = function() {
         document.body.appendChild(overlay);
     }
 
-    overlay.style.backgroundColor = "#f1c40f"; // Najpierw żółty
+    overlay.style.backgroundColor = "#f1c40f";
 
-    // STROBOSKOP (Miganie)
+    // Miganie TYLKO jeśli impreza jest ON
     if (isPartyMode) {
         if (strobeInterval) clearInterval(strobeInterval);
         let flash = false;
         strobeInterval = setInterval(() => {
             overlay.style.backgroundColor = flash ? "#ffffff" : "#f1c40f";
             flash = !flash;
-        }, 80); // Prędkość: 80ms
+        }, 100);
     }
 
-    // KONFETTI
+    // Konfetti
     if (confettiInterval) clearInterval(confettiInterval);
     confettiInterval = setInterval(() => {
-        confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0, y: 1 } });
-        confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1, y: 1 } });
-    }, 250);
+        confetti({ particleCount: 5, origin: { y: 1 } });
+    }, 300);
 
-    if (audio) {
-        audio.currentTime = 0;
-        audio.play().catch(() => console.log("Kliknij na stronę, aby odtworzyć dźwięk!"));
-    }
+    if (audio) { audio.currentTime = 0; audio.play(); }
 }
 
-// STOP EFEKTÓW
-window.stopBarkaEffect = function() {
+// --- STOP EFEKTÓW ---
+function stopBarkaEffect() {
     if (strobeInterval) clearInterval(strobeInterval);
     if (confettiInterval) clearInterval(confettiInterval);
+    strobeInterval = null;
+    confettiInterval = null;
     const overlay = document.getElementById('party-overlay');
     if (overlay) overlay.style.backgroundColor = "transparent";
 }
 
-// KONIEC AUDIO -> STOP EFEKTÓW
-const audioTag = document.getElementById('barka-audio');
-if (audioTag) audioTag.onended = window.stopBarkaEffect;
+// Obsługa przycisku Impreza
+window.toggleParty = function() {
+    isPartyMode = !isPartyMode;
+    const btn = document.getElementById("party-btn");
+    btn.innerText = `Impreza: ${isPartyMode ? "ON" : "OFF"}`;
+    btn.style.background = isPartyMode ? "#2ecc71" : "#e74c3c";
 
-// --- CZAT ---
+    // JEŚLI WYŁĄCZYSZ W TRAKCIE - zatrzymaj miganie natychmiast
+    if (!isPartyMode) {
+        if (strobeInterval) {
+            clearInterval(strobeInterval);
+            strobeInterval = null;
+            const overlay = document.getElementById('party-overlay');
+            if (overlay) overlay.style.backgroundColor = "#f1c40f"; // Zostaje tylko żółty (bez migania)
+        }
+    }
+};
+
+// Czat
 db.ref("wiadomosci").limitToLast(15).on("child_added", (snapshot) => {
     const dane = snapshot.val();
     const chatBox = document.getElementById("chat-box");
@@ -77,9 +86,8 @@ db.ref("wiadomosci").limitToLast(15).on("child_added", (snapshot) => {
         chatBox.appendChild(msg);
         chatBox.scrollTop = chatBox.scrollHeight;
     }
-    // Komenda /test na czacie
     if (dane.tekst === "/test" && (Date.now() - dane.czas < 5000)) {
-        window.startBarkaEffect();
+        startBarkaEffect();
     }
 });
 
@@ -89,27 +97,19 @@ window.sendMsg = function() {
     if (!tekst) return;
     db.ref("wiadomosci").push({ autor: nick, tekst: tekst, czas: Date.now() });
     document.getElementById("tekst").value = "";
-}
+};
 
-// --- LOGIKA IMPREZY I TIMERA ---
-window.toggleParty = function() {
-    isPartyMode = !isPartyMode;
-    const btn = document.getElementById("party-btn");
-    btn.innerText = `Impreza: ${isPartyMode ? "ON" : "OFF"}`;
-    btn.style.background = isPartyMode ? "#2ecc71" : "#e74c3c";
-}
-
+// Licznik
 function updateTimer() {
     const timerEl = document.getElementById("timer");
     const now = new Date();
     const polandTime = new Date(now.toLocaleString("en-US", {timeZone: "Europe/Warsaw"}));
-    
     let target = new Date(polandTime);
     target.setHours(21, 37, 0, 0);
     if (polandTime > target) target.setDate(target.getDate() + 1);
 
     const diff = target - polandTime;
-    if (diff > 0 && diff < 1000) window.startBarkaEffect();
+    if (diff > 0 && diff < 1000) startBarkaEffect();
 
     const h = Math.floor(diff / 3600000);
     const m = Math.floor((diff % 3600000) / 60000);
@@ -117,3 +117,4 @@ function updateTimer() {
     timerEl.innerText = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 setInterval(updateTimer, 1000);
+document.getElementById('barka-audio').onended = stopBarkaEffect;
