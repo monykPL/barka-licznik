@@ -3,29 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Barka 21:37 - Licznik</title>
+    <title>Barka 21:37</title>
     <link rel="stylesheet" href="style.css">
-    
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
 <body id="bg-body">
 
-    <div class="container">
-        <h1>Odliczanie do 21:37</h1>
-        <div id="timer">00:00:00</div>
-        
-        <button id="party-btn" onclick="toggleParty()">Impreza: OFF</button>
-        
-        <div class="chat-section">
-            <div id="chat-box"></div>
-            <div class="input-area">
-                <input type="text" id="nick" placeholder="Twój nick">
-                <input type="text" id="tekst" placeholder="Napisz coś... (/test)">
-                <button onclick="sendMsg()">Wyślij</button>
-            </div>
-        </div>
+    <h1>Odliczanie do 21:37</h1>
+    <div id="timer">00:00:00</div>
+    
+    <button id="party-btn" onclick="toggleParty()">Impreza: OFF</button>
+
+    <div class="chat-container">
+        <div id="chat-box"></div>
+        <input type="text" id="nick" placeholder="Nick">
+        <input type="text" id="tekst" placeholder="Wiadomość... (/test)">
+        <button onclick="sendMsg()">Wyślij</button>
     </div>
 
     <audio id="barka-audio" src="barka.mp3"></audio>
