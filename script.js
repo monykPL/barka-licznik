@@ -15,9 +15,9 @@ const firebaseConfig = {
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// --- NAPRAWIONA FUNKCJA EFEKTÓW ---
+// --- EFEKTY ---
 function startBarkaEffect() {
-    stopBarkaEffect(); // Najpierw czyścimy wszystko, żeby uniknąć nakładania się
+    stopBarkaEffect(); // Czyścimy stare procesy
 
     const audio = document.getElementById('barka-audio');
     let overlay = document.getElementById('party-overlay');
@@ -27,6 +27,7 @@ function startBarkaEffect() {
         document.body.appendChild(overlay);
     }
 
+    // Miganie tła (Flashbang)
     if (isPartyMode) {
         let flash = false;
         strobeInterval = setInterval(() => {
@@ -37,13 +38,27 @@ function startBarkaEffect() {
         overlay.style.backgroundColor = "#f1c40f";
     }
 
+    // Konfetti z dwóch boków
     confettiInterval = setInterval(() => {
-        confetti({ particleCount: 7, spread: 60, origin: { y: 0.9 } });
-    }, 250);
+        // Lewy bok
+        confetti({
+            particleCount: 5,
+            angle: 60,
+            spread: 55,
+            origin: { x: 0, y: 0.9 }
+        });
+        // Prawy bok
+        confetti({
+            particleCount: 5,
+            angle: 120,
+            spread: 55,
+            origin: { x: 1, y: 0.9 }
+        });
+    }, 300);
 
     if (audio) {
         audio.currentTime = 0;
-        audio.play().catch(() => console.log("Interakcja wymagana do audio"));
+        audio.play().catch(() => console.log("Kliknij na stronę, by usłyszeć dźwięk."));
     }
 }
 
@@ -58,16 +73,22 @@ function stopBarkaEffect() {
 
 // --- LOGIKA PRZYCISKÓW ---
 window.toggleParty = function() {
+    if (!isPartyMode) {
+        // Wyświetla komunikat tylko przy włączaniu
+        alert("OSTRZEŻENIE: Tryb imprezy zawiera szybko migające światła, które mogą wywołać napad epilepsji u osób wrażliwych.");
+    }
+    
     isPartyMode = !isPartyMode;
     const btn = document.getElementById("party-btn");
     btn.innerText = `IMPREZA: ${isPartyMode ? "WŁĄCZONA" : "WYŁĄCZONA"}`;
     btn.style.backgroundColor = isPartyMode ? "#2ecc71" : "#495057";
-    
-    // Jeśli wyłączasz w trakcie trwania efektów, od razu przestań migać
-    if (!isPartyMode) {
+
+    // Natychmiastowe zatrzymanie migania przy wyłączeniu w trakcie
+    if (!isPartyMode && strobeInterval) {
         clearInterval(strobeInterval);
+        strobeInterval = null;
         const overlay = document.getElementById('party-overlay');
-        if (overlay) overlay.style.backgroundColor = "#f1c40f"; 
+        if (overlay) overlay.style.backgroundColor = "#f1c40f";
     }
 };
 
@@ -100,8 +121,8 @@ db.ref("wiadomosci").limitToLast(20).on("child_added", (snapshot) => {
     const chatBox = document.getElementById("chat-box");
     const msg = document.createElement("div");
     
-    if(dane.autor === "SYSTEM") msg.className = "system-msg";
-    else if(dane.autor === "BOT") msg.className = "bot-msg";
+    if(dane.autor === "SYSTEM") msg.style.color = "#f1c40f";
+    else if(dane.autor === "BOT") msg.style.color = "#3498db";
     
     msg.innerHTML = `<b>${dane.autor}:</b> ${dane.tekst}`;
     chatBox.appendChild(msg);
