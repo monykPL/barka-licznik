@@ -15,14 +15,15 @@ body {
 
 /* EFEKT MIGANIA (STROBOSKOP) */
 .party-mode {
-    animation: flash 0.15s infinite !important;
+    /* Wymuszamy animację nad wszystkimi innymi tłami */
+    animation: flash 0.1s infinite !important; 
     transition: none !important;
 }
 
 @keyframes flash {
-    0% { background-color: #f1c40f; }
-    50% { background-color: #ffffff; }
-    100% { background-color: #f1c40f; }
+    0% { background-color: #f1c40f !important; }
+    50% { background-color: #ffffff !important; }
+    100% { background-color: #f1c40f !important; }
 }
 
 /* KONTROLKI W PRAWYM GÓRNYM ROGU */
