@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Barka 21:37 - MonykPL</title>
-    
+    <title>Barka 21:37 - monykPL</title>
     <link rel="stylesheet" href="style.css">
     
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
@@ -13,28 +12,31 @@
 </head>
 <body id="bg-body">
 
-    <div class="top-right-controls">
-        <button id="sound-test-btn" onclick="checkSound()">KLIJKNIJ, ABY SPRAWDZIĆ DŹWIĘK</button>
-        <button id="party-btn" class="btn-grey" onclick="toggleParty()">IMPREZA: WYŁĄCZONA</button>
-        <div class="sound-note">(Musisz usłyszeć 3 sekundy Barki)</div>
+    <div class="top-controls">
+        <div class="sound-section">
+            <button class="orange-btn" onclick="checkSound()">KLIKNIJ, ABY SPRAWDZIĆ DŹWIĘK</button>
+            <p class="sub-text">(Musisz usłyszeć 3 sekundy Barki)</p>
+        </div>
+        <button id="party-btn" class="grey-btn" onclick="toggleParty()">IMPREZA: WYŁĄCZONA</button>
     </div>
 
     <div class="center-content">
-        <div class="timer-label">Do godziny 21:37 pozostało:```json
-{
-  "name": "barka-2137",
-  "version": "1.0.0",
-  "description": "Licznik Barki 21:37 - made by: monykPL",
-  "main": "index.html",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [
-    "barka",
-    "21:37",
-    "pjp2",
-    "timer"
-  ],
-  "author": "monykPL",
-  "license": "MIT"
-}
+        <p class="timer-desc">Do godziny 21:37 pozostało:</p>
+        <div id="timer">00:00:00</div>
+        <p class="footer-text">made by: monykPL</p>
+    </div>
+
+    <div class="chat-container">
+        <div id="chat-box"></div>
+        <div class="input-row">
+            <input type="text" id="tekst" placeholder="Napisz coś (lub /test)...">
+            <button id="send-btn" onclick="sendMsg()">Wyślij</button>
+            <span id="timestamp-display"></span>
+        </div>
+    </div>
+
+    <audio id="barka-audio" src="barka.mp3"></audio>
+
+    <script src="script.js"></script>
+</body>
+</html>
