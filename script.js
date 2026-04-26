@@ -12,7 +12,6 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// --- ZMIENNE GLOBALNE ---
 let isPartyMode = false;
 let confettiInterval = null;
 
@@ -21,7 +20,7 @@ db.ref("wiadomosci").limitToLast(50).on("child_added", (snapshot) => {
     const dane = snapshot.val();
     const messages = document.getElementById('chat-messages');
     const msg = document.createElement('p');
-    msg.innerHTML = `<strong>Anonim:</strong> ${dane.tekst}`;
+    msg.innerHTML = `<strong>${dane.autor || "Anonim"}:</strong> ${dane.tekst}`;
     messages.appendChild(msg);
     messages.scrollTop = messages.scrollHeight;
 });
@@ -35,23 +34,27 @@ function sendMessage() {
         return;
     }
     if (val !== "") {
-        db.ref("wiadomosci").push({ tekst: val, czas: Date.now() });
+        db.ref("wiadomosci").push({ autor: "Anonim", tekst: val, czas: Date.now() });
         input.value = "";
     }
 }
 
-// --- NOWY PRZYCISK: EPILEPSJA / IMPREZA ---
+// --- SYSTEMOWA WIADOMOŚĆ ---
+function sendSystemMessage(text) {
+    db.ref("wiadomosci").push({
+        autor: "SYSTEM",
+        tekst: text,
+        czas: Date.now()
+    });
+}
+
+// --- PRZYCISK IMPREZY ---
 document.getElementById('epilepsy-btn').onclick = function() {
     if (!isPartyMode) {
-        let zgoda = confirm("⚠️ OSTRZEŻENIE ⚠️\n\nWłączenie tej opcji spowoduje intensywne, szybkie miganie tła podczas utworu. Może to wywołać atak u osób cierpiących na padaczkę fotogenną.\n\nCzy na pewno chcesz włączyć tryb imprezowy?");
-        
-        if (zgoda) {
+        if (confirm("⚠️ OSTRZEŻENIE: Włączyć migające światła (stroboskop)?")) {
             isPartyMode = true;
             this.innerText = "IMPREZA: WŁĄCZONA";
             this.style.backgroundColor = "red";
-            this.style.color = "white";
-            
-            // Jeśli Barka gra w tym momencie, odpal od razu
             if (document.getElementById('bg-body').classList.contains('yellow-mode')) {
                 document.getElementById('bg-body').classList.add('party-mode');
             }
@@ -64,70 +67,52 @@ document.getElementById('epilepsy-btn').onclick = function() {
     }
 };
 
-// --- DŹWIĘK ---
+// --- DŹWIĘK TEST ---
 document.getElementById('test-audio-btn').onclick = function() {
     const audio = document.getElementById('barka-audio');
-    const btn = document.getElementById('test-audio-btn');
-    btn.innerText = "GRA DŹWIĘK...";
     audio.volume = 1.0;
-    
     audio.play().then(() => {
         setTimeout(() => {
             audio.pause();
             audio.currentTime = 0;
             document.getElementById('audio-unlocker').style.display = 'none';
-            
-            const messages = document.getElementById('chat-messages');
-            const systemMsg = document.createElement('p');
-            systemMsg.className = 'system-msg';
-            systemMsg.innerHTML = `<strong>System:</strong> Dźwięk działa! Oczekuj na godzinę zero.`;
-            messages.appendChild(systemMsg);
         }, 3000);
-    }).catch(err => alert("BŁĄD! Przeglądarka zablokowała dźwięk. Kliknij ponownie."));
+    });
 };
 
-// --- LOGIKA IMPREZY I POWROTU TŁA ---
+// --- EFEKTY ---
 function startConfetti() {
     if (confettiInterval) clearInterval(confettiInterval);
     confettiInterval = setInterval(() => {
-        confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0, y: 1 }, zIndex: 9999 });
-        confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1, y: 1 }, zIndex: 9999 });
+        confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0, y: 1 } });
+        confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1, y: 1 } });
     }, 250);
 }
-
-function stopConfetti() {
-    if (confettiInterval) {
-        clearInterval(confettiInterval);
-        confettiInterval = null;
-    }
-}
-
-// Gdy Barka się skończy:
-document.getElementById('barka-audio').onended = function() {
-    document.getElementById('bg-body').classList.remove('yellow-mode', 'party-mode');
-    stopConfetti();
-};
 
 function activatePapalMode() {
     const audio = document.getElementById('barka-audio');
     const bg = document.getElementById('bg-body');
     
     bg.classList.add('yellow-mode');
-    if (isPartyMode) {
-        bg.classList.add('party-mode');
-    }
+    if (isPartyMode) bg.classList.add('party-mode');
     
     startConfetti();
+    sendSystemMessage("Wybiła godzina 21:37! 🚣‍♂️"); // Wiadomość na czacie dla wszystkich
     
     audio.currentTime = 0;
-    audio.play().catch(e => console.error("Audio error:", e));
+    audio.play();
 }
 
-// --- LOGIKA CZASU ---
+document.getElementById('barka-audio').onended = function() {
+    document.getElementById('bg-body').classList.remove('yellow-mode', 'party-mode');
+    clearInterval(confettiInterval);
+};
+
+// --- ZEGAR ---
 function update() {
     const now = new Date();
     document.getElementById('small-clock').innerText = now.toLocaleTimeString();
-
+    
     let target = new Date();
     target.setHours(21, 37, 0, 0);
     if (now > target) target.setDate(target.getDate() + 1);
@@ -144,10 +129,7 @@ function update() {
         activatePapalMode();
     }
 }
-
 setInterval(update, 1000);
 update();
 
-document.getElementById('chat-input').onkeypress = function(e) {
-    if (e.key === 'Enter') sendMessage();
-};
+document.getElementById('chat-input').onkeypress = (e) => { if (e.key === 'Enter') sendMessage(); };
