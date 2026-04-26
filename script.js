@@ -1,9 +1,8 @@
-// --- ZMIENNE GLOBALNE ---
+// --- KONFIGURACJA I ZMIENNE ---
 let strobeInterval = null;
 let confettiInterval = null;
 let isPartyMode = false;
 
-// --- KONFIGURACJA FIREBASE ---
 const firebaseConfig = {
     apiKey: "AIzaSyDgn4ux6ZJyFbxbG-aB-kv9GjNqfPJUiSw",
     authDomain: "monyk-czat.firebaseapp.com",
@@ -14,26 +13,44 @@ const firebaseConfig = {
     appId: "1:39641097299:web:aac07712b25e2b501652a6"
 };
 
-firebase.initializeApp(firebaseConfig);
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
 const db = firebase.database();
 
-// --- FUNKCJA STARTUJĄCA EFEKTY (Barka/Test) ---
+// --- FUNKCJA MIGANIA (STROBOSKOP) ---
 function startBarkaEffect() {
     const audio = document.getElementById('barka-audio');
     const bg = document.getElementById('bg-body');
     
-    // 1. Zawsze żółte tło
-    bg.style.backgroundColor = "#f1c40f";
+    // Usuwamy stary overlay jeśli istnieje
+    let overlay = document.getElementById('party-overlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'party-overlay';
+        overlay.style.position = 'fixed';
+        overlay.style.top = '0';
+        overlay.style.left = '0';
+        overlay.style.width = '100vw';
+        overlay.style.height = '100vh';
+        overlay.style.zIndex = '-1'; // Pod spodem wszystkiego
+        overlay.style.pointerEvents = 'none'; // Nie blokuje kliknięć
+        document.body.appendChild(overlay);
+    }
+
+    // 1. Ustawiamy bazowy żółty
+    overlay.style.backgroundColor = "#f1c40f";
     bg.classList.add('yellow-mode');
 
-    // 2. Jeśli impreza jest ON - włączamy miganie (stroboskop)
+    // 2. Jeśli impreza jest ON - wymuszamy miganie przez JavaScript
     if (isPartyMode) {
-        if (strobeInterval) clearInterval(strobeInterval); // Czyścimy jeśli już działało
-        let isWhite = false;
+        if (strobeInterval) clearInterval(strobeInterval);
+        let flash = false;
         strobeInterval = setInterval(() => {
-            bg.style.setProperty('background-color', isWhite ? '#f1c40f' : '#ffffff', 'important');
-            isWhite = !isWhite;
+            overlay.style.backgroundColor = flash ? "#ffffff" : "#f1c40f";
+            flash = !flash;
         }, 100);
+        console.log("⚡ Stroboskop startuje!");
     }
 
     // 3. Konfetti
@@ -43,55 +60,49 @@ function startBarkaEffect() {
         confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1, y: 1 } });
     }, 250);
 
-    // 4. Audio
     audio.currentTime = 0;
     audio.play();
 }
 
-// --- FUNKCJA KOŃCZĄCA EFEKTY ---
+// --- STOPOWANIE EFEKTÓW ---
 function stopBarkaEffect() {
+    if (strobeInterval) clearInterval(strobeInterval);
+    if (confettiInterval) clearInterval(confettiInterval);
+    
+    const overlay = document.getElementById('party-overlay');
+    if (overlay) overlay.style.backgroundColor = "transparent";
+    
     const bg = document.getElementById('bg-body');
-    
-    // Zatrzymujemy miganie
-    if (strobeInterval) {
-        clearInterval(strobeInterval);
-        strobeInterval = null;
-    }
-    
-    // Zatrzymujemy konfetti
-    if (confettiInterval) {
-        clearInterval(confettiInterval);
-        confettiInterval = null;
-    }
-
-    // Resetujemy tło i klasy
-    bg.style.backgroundColor = ""; 
-    bg.classList.remove('yellow-mode', 'party-mode');
+    bg.classList.remove('yellow-mode');
+    console.log("🛑 Efekty zatrzymane.");
 }
 
-// Obsługa końca piosenki
 document.getElementById('barka-audio').onended = stopBarkaEffect;
 
-// --- OBSŁUGA CZATU (W tym komenda /test) ---
-db.ref("wiadomosci").limitToLast(15).on("child_added", (snapshot) => {
+// --- OBSŁUGA CZATU I KOMENDY /test ---
+db.ref("wiadomosci").limitToLast(1).on("child_added", (snapshot) => {
     const dane = snapshot.val();
     const chatBox = document.getElementById("chat-box");
     
-    const msg = document.createElement("div");
-    msg.innerHTML = `<b>${dane.autor}:</b> ${dane.tekst}`;
-    chatBox.appendChild(msg);
-    chatBox.scrollTop = chatBox.scrollHeight;
+    if (chatBox) {
+        const msg = document.createElement("div");
+        msg.innerHTML = `<b>${dane.autor}:</b> ${dane.tekst}`;
+        chatBox.appendChild(msg);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
 
-    // Komenda /test - tylko jeśli Ty ją wpiszesz (lub ktokolwiek)
-    if (dane.tekst === "/test" && dane.autor !== "SYSTEM") {
+    // KOMENDA /test (Zignoruj jeśli wiadomość jest starsza niż 5 sekund)
+    if (dane.tekst === "/test" && (Date.now() - dane.czas < 5000)) {
+        console.log("🛠 Wykryto komendę /test");
         startBarkaEffect();
     }
 });
 
 // Wysyłanie wiadomości
-function sendMsg() {
+window.sendMsg = function() {
     const nick = document.getElementById("nick").value || "Anonim";
-    const tekst = document.getElementById("tekst").value;
+    const tekstInput = document.getElementById("tekst");
+    const tekst = tekstInput.value;
     if (!tekst) return;
 
     db.ref("wiadomosci").push({
@@ -99,18 +110,21 @@ function sendMsg() {
         tekst: tekst,
         czas: Date.now()
     });
-    document.getElementById("tekst").value = "";
-}
+    tekstInput.value = "";
+};
 
 // --- PRZYCISK TRYBU IMPREZY ---
-function toggleParty() {
+window.toggleParty = function() {
     isPartyMode = !isPartyMode;
     const btn = document.getElementById("party-btn");
-    btn.innerText = `Impreza: ${isPartyMode ? "ON" : "OFF"}`;
-    btn.style.background = isPartyMode ? "#2ecc71" : "#e74c3c";
-}
+    if (btn) {
+        btn.innerText = `Impreza: ${isPartyMode ? "ON" : "OFF"}`;
+        btn.style.background = isPartyMode ? "#2ecc71" : "#e74c3c";
+    }
+    console.log("Tryb imprezy:", isPartyMode);
+};
 
-// --- LICZNIK CZASU DO 21:37 ---
+// --- LICZNIK DO 21:37 ---
 function updateTimer() {
     const now = new Date();
     const polandTime = new Date(now.toLocaleString("en-US", {timeZone: "Europe/Warsaw"}));
@@ -124,8 +138,8 @@ function updateTimer() {
 
     const diff = target - polandTime;
     
-    // Sprawdzenie czy wybiła 21:37 (dokładnie co do sekundy)
-    if (diff <= 1000 && diff > 0) {
+    // Jeśli wybije dokładnie 21:37:00
+    if (diff > 0 && diff < 1000) {
         startBarkaEffect();
     }
 
@@ -133,8 +147,10 @@ function updateTimer() {
     const m = Math.floor((diff % 3600000) / 60000);
     const s = Math.floor((diff % 60000) / 1000);
 
-    document.getElementById("timer").innerText = 
-        `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    const timerEl = document.getElementById("timer");
+    if (timerEl) {
+        timerEl.innerText = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
 }
 
 setInterval(updateTimer, 1000);
