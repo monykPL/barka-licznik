@@ -1,137 +1,140 @@
+// --- ZMIENNE GLOBALNE ---
 let strobeInterval = null;
+let confettiInterval = null;
+let isPartyMode = false;
+
+// --- KONFIGURACJA FIREBASE ---
 const firebaseConfig = {
-  apiKey: "AIzaSyDgn4ux6ZJyFbxbG-aB-kv9GjNqfPJUiSw",
-  authDomain: "monyk-czat.firebaseapp.com",
-  databaseURL: "https://monyk-czat-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "monyk-czat",
-  storageBucket: "monyk-czat.firebasestorage.app",
-  messagingSenderId: "39641097299",
-  appId: "1:39641097299:web:aac07712b25e2b501652a6",
-  measurementId: "G-SZ8E653FZW"
+    apiKey: "AIzaSyDgn4ux6ZJyFbxbG-aB-kv9GjNqfPJUiSw",
+    authDomain: "monyk-czat.firebaseapp.com",
+    databaseURL: "https://monyk-czat-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "monyk-czat",
+    storageBucket: "monyk-czat.firebasestorage.app",
+    messagingSenderId: "39641097299",
+    appId: "1:39641097299:web:aac07712b25e2b501652a6"
 };
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-let isPartyMode = false;
-let confettiInterval = null;
-
-// --- CZAT ---
-db.ref("wiadomosci").limitToLast(50).on("child_added", (snapshot) => {
-    const dane = snapshot.val();
-    const messages = document.getElementById('chat-messages');
-    const msg = document.createElement('p');
-    // Jeśli autor to SYSTEM, dodajemy specjalną klasę
-    if(dane.autor === "SYSTEM") {
-        msg.className = "system-msg";
-        msg.innerHTML = `<strong>${dane.autor}:</strong> ${dane.tekst}`;
-    } else {
-        msg.innerHTML = `<strong>${dane.autor || "Anonim"}:</strong> ${dane.tekst}`;
-    }
-    messages.appendChild(msg);
-    messages.scrollTop = messages.scrollHeight;
-});
-
-function sendMessage() {
-    const input = document.getElementById('chat-input');
-    const val = input.value.trim();
-    if (val === "/test") { activatePapalMode(); input.value = ""; return; }
-    if (val !== "") {
-        db.ref("wiadomosci").push({ autor: "Anonim", tekst: val, czas: Date.now() });
-        input.value = "";
-    }
-}
-
-// --- PRZYCISK IMPREZY ---
-document.getElementById('epilepsy-btn').onclick = function() {
-    const bg = document.getElementById('bg-body');
-    if (!isPartyMode) {
-        if (confirm("⚠️ OSTRZEŻENIE: Włączyć miganie światła?")) {
-            isPartyMode = true;
-            this.innerText = "IMPREZA: WŁĄCZONA";
-            this.style.backgroundColor = "red";
-            if (bg.classList.contains('yellow-mode')) bg.classList.add('party-mode');
-        }
-    } else {
-        isPartyMode = false;
-        this.innerText = "IMPREZA: WYŁĄCZONA";
-        this.style.backgroundColor = "#555";
-        bg.classList.remove('party-mode');
-    }
-};
-
-// --- DŹWIĘK TEST ---
-document.getElementById('test-audio-btn').onclick = function() {
-    const audio = document.getElementById('barka-audio');
-    audio.play().then(() => {
-        setTimeout(() => {
-            audio.pause(); audio.currentTime = 0;
-            document.getElementById('audio-unlocker').style.display = 'none';
-        }, 3000);
-    });
-};
-
-// --- EFEKTY ---
-function activatePapalMode() {
+// --- FUNKCJA STARTUJĄCA EFEKTY (Barka/Test) ---
+function startBarkaEffect() {
     const audio = document.getElementById('barka-audio');
     const bg = document.getElementById('bg-body');
     
-    // Zawsze włączamy żółte tło
+    // 1. Zawsze żółte tło
     bg.style.backgroundColor = "#f1c40f";
+    bg.classList.add('yellow-mode');
 
-    // Jeśli tryb imprezy jest włączony, uruchamiamy "ręczne" miganie
+    // 2. Jeśli impreza jest ON - włączamy miganie (stroboskop)
     if (isPartyMode) {
+        if (strobeInterval) clearInterval(strobeInterval); // Czyścimy jeśli już działało
         let isWhite = false;
-        // Czyścimy stary interval, jeśli jakiś był
-        if (strobeInterval) clearInterval(strobeInterval); 
-        
         strobeInterval = setInterval(() => {
             bg.style.setProperty('background-color', isWhite ? '#f1c40f' : '#ffffff', 'important');
             isWhite = !isWhite;
-        }, 100); // 100ms = bardzo szybkie miganie
+        }, 100);
     }
 
-    // Wiadomość na czat
-    db.ref("wiadomosci").push({
-        autor: "SYSTEM",
-        tekst: "Wybiła 21:37! Tryb Imprezy: " + (isPartyMode ? "ON ⚡" : "OFF"),
-        czas: Date.now()
-    });
-
-    audio.currentTime = 0;
-    audio.play();
-}
-
-    // 4. Konfetti
+    // 3. Konfetti
+    if (confettiInterval) clearInterval(confettiInterval);
     confettiInterval = setInterval(() => {
         confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0, y: 1 } });
         confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1, y: 1 } });
     }, 250);
 
+    // 4. Audio
     audio.currentTime = 0;
     audio.play();
 }
 
-document.getElementById('barka-audio').onended = function() {
+// --- FUNKCJA KOŃCZĄCA EFEKTY ---
+function stopBarkaEffect() {
     const bg = document.getElementById('bg-body');
-    bg.classList.remove('yellow-mode', 'party-mode');
-    clearInterval(confettiInterval);
-};
+    
+    // Zatrzymujemy miganie
+    if (strobeInterval) {
+        clearInterval(strobeInterval);
+        strobeInterval = null;
+    }
+    
+    // Zatrzymujemy konfetti
+    if (confettiInterval) {
+        clearInterval(confettiInterval);
+        confettiInterval = null;
+    }
 
-// --- ZEGAR ---
-function update() {
+    // Resetujemy tło i klasy
+    bg.style.backgroundColor = ""; 
+    bg.classList.remove('yellow-mode', 'party-mode');
+}
+
+// Obsługa końca piosenki
+document.getElementById('barka-audio').onended = stopBarkaEffect;
+
+// --- OBSŁUGA CZATU (W tym komenda /test) ---
+db.ref("wiadomosci").limitToLast(15).on("child_added", (snapshot) => {
+    const dane = snapshot.val();
+    const chatBox = document.getElementById("chat-box");
+    
+    const msg = document.createElement("div");
+    msg.innerHTML = `<b>${dane.autor}:</b> ${dane.tekst}`;
+    chatBox.appendChild(msg);
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    // Komenda /test - tylko jeśli Ty ją wpiszesz (lub ktokolwiek)
+    if (dane.tekst === "/test" && dane.autor !== "SYSTEM") {
+        startBarkaEffect();
+    }
+});
+
+// Wysyłanie wiadomości
+function sendMsg() {
+    const nick = document.getElementById("nick").value || "Anonim";
+    const tekst = document.getElementById("tekst").value;
+    if (!tekst) return;
+
+    db.ref("wiadomosci").push({
+        autor: nick,
+        tekst: tekst,
+        czas: Date.now()
+    });
+    document.getElementById("tekst").value = "";
+}
+
+// --- PRZYCISK TRYBU IMPREZY ---
+function toggleParty() {
+    isPartyMode = !isPartyMode;
+    const btn = document.getElementById("party-btn");
+    btn.innerText = `Impreza: ${isPartyMode ? "ON" : "OFF"}`;
+    btn.style.background = isPartyMode ? "#2ecc71" : "#e74c3c";
+}
+
+// --- LICZNIK CZASU DO 21:37 ---
+function updateTimer() {
     const now = new Date();
-    document.getElementById('small-clock').innerText = now.toLocaleTimeString();
-    let target = new Date();
+    const polandTime = new Date(now.toLocaleString("en-US", {timeZone: "Europe/Warsaw"}));
+    
+    let target = new Date(polandTime);
     target.setHours(21, 37, 0, 0);
-    if (now > target) target.setDate(target.getDate() + 1);
-    const diff = target - now;
+
+    if (polandTime > target) {
+        target.setDate(target.getDate() + 1);
+    }
+
+    const diff = target - polandTime;
+    
+    // Sprawdzenie czy wybiła 21:37 (dokładnie co do sekundy)
+    if (diff <= 1000 && diff > 0) {
+        startBarkaEffect();
+    }
+
     const h = Math.floor(diff / 3600000);
     const m = Math.floor((diff % 3600000) / 60000);
     const s = Math.floor((diff % 60000) / 1000);
-    document.getElementById('countdown').innerText = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-    if (now.getHours() === 21 && now.getMinutes() === 37 && now.getSeconds() === 0) activatePapalMode();
+
+    document.getElementById("timer").innerText = 
+        `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
-setInterval(update, 1000);
-update();
-document.getElementById('chat-input').onkeypress = (e) => { if (e.key === 'Enter') sendMessage(); };
+
+setInterval(updateTimer, 1000);
