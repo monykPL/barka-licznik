@@ -3,42 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Strona monykPL</title>
+    <title>Barka 21:37 - MonykPL</title>
+    
     <link rel="stylesheet" href="style.css">
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
 <body id="bg-body">
 
-    <div id="top-controls">
-        <div id="audio-unlocker">
-            <button id="test-audio-btn">KLIKNIJ, ABY SPRAWDZIĆ DŹWIĘK</button>
-            <p class="small-info">(Musisz usłyszeć 3 sekundy Barki)</p>
-        </div>
-        <button id="epilepsy-btn">IMPREZA: WYŁĄCZONA</button>
+    <div class="top-right-controls">
+        <button id="sound-test-btn" onclick="checkSound()">KLIJKNIJ, ABY SPRAWDZIĆ DŹWIĘK</button>
+        <button id="party-btn" class="btn-grey" onclick="toggleParty()">IMPREZA: WYŁĄCZONA</button>
+        <div class="sound-note">(Musisz usłyszeć 3 sekundy Barki)</div>
     </div>
 
-    <div id="center-content">
-        <p class="label">Do godziny 21:37 pozostało:</p>
-        <h1 id="countdown">00:00:00</h1>
-        <p id="author">made by: monykPL</p>
-    </div>
-
-    <div id="chat-container">
-        <div id="chat-messages"></div>
-        <div id="chat-input-area">
-            <input type="text" id="chat-input" placeholder="Napisz coś (lub /test)...">
-            <button onclick="sendMessage()">Wyślij</button>
-            <div id="small-clock">00:00:00</div>
-        </div>
-    </div>
-
-    <audio id="barka-audio" preload="auto">
-        <source src="barka.mp3" type="audio/mpeg">
-    </audio>
-
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <script src="script.js"></script>
-
-</body>
-</html>
+    <div class="center-content">
+        <div class="timer-label">Do godziny 21:37 pozostało:```json
+{
+  "name": "barka-2137",
+  "version": "1.0.0",
+  "description": "Licznik Barki 21:37 - made by: monykPL",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "barka",
+    "21:37",
+    "pjp2",
+    "timer"
+  ],
+  "author": "monykPL",
+  "license": "MIT"
+}
