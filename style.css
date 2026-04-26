@@ -1,44 +1,110 @@
+/* GŁÓWNE USTAWIENIA STRONY */
 body {
-    margin: 0; padding: 0; height: 100vh; display: flex;
-    font-family: 'Segoe UI', sans-serif; background-color: #333; color: white;
-    transition: background-color 1.5s ease; overflow: hidden;
+    background-color: #2c2f33;
+    color: white;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    overflow: hidden; /* Blokuje paski przewijania, gdy spada konfetti */
+    transition: background-color 0.5s ease;
 }
 
-.yellow-mode { background-color: #ffeb3b !important; color: black !important; }
+/* WŁĄCZA ŻÓŁTE TŁO O 21:37 */
+.yellow-mode {
+    background-color: #f1c40f !important;
+    color: black;
+}
 
-/* CZAT */
-#chat-container { width: 350px; background: rgba(0, 0, 0, 0.4); display: flex; flex-direction: column; border-right: 1px solid #444; }
-#chat-messages { flex-grow: 1; padding: 20px; overflow-y: auto; font-size: 14px; }
-.system-msg { color: #00ff00; font-style: italic; margin-bottom: 15px; border-bottom: 1px solid #555; padding-bottom: 5px; }
-#chat-input-area { display: flex; align-items: center; padding: 15px; background: #222; gap: 8px; }
-#chat-input { flex-grow: 1; padding: 8px; border: 1px solid #444; background: #111; color: white; border-radius: 4px; }
-#small-clock { font-size: 11px; color: #888; font-family: monospace; min-width: 55px; }
+/* EFEKT MIGANIA (STROBOSKOP) */
+.party-mode {
+    animation: flash 0.3s infinite !important;
+}
 
-/* ŚRODEK */
-#center-content { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-#countdown { font-size: clamp(50px, 10vw, 120px); margin: 10px 0; font-family: monospace; font-weight: bold; }
-#author { margin-top: 20px; opacity: 0.6; }
+@keyframes flash {
+    0% { background-color: #ffeb3b; }
+    50% { background-color: #ffffff; }
+    100% { background-color: #ffeb3b; }
+}
 
-/* PRZYCISK W PRAWYM GÓRNYM ROGU */
-#audio-unlocker {
-    position: fixed;
+/* KONTROLKI W PRAWYM GÓRNYM ROGU */
+#top-controls {
+    position: absolute;
     top: 20px;
     right: 20px;
-    z-index: 9999;
-    text-align: right;
+    display: flex;
+    gap: 15px;
+    align-items: flex-start;
+    z-index: 100;
 }
 
-#test-audio-btn {
-    padding: 12px 20px;
-    font-size: 14px;
-    background-color: #ff9800;
-    color: black;
-    border: 2px solid white;
+#audio-unlocker {
+    text-align: center;
+}
+
+#test-audio-btn, #epilepsy-btn, #chat-input-area button {
+    padding: 10px 15px;
+    font-size: 12px;
+    font-weight: bold;
     border-radius: 8px;
     cursor: pointer;
-    font-weight: bold;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-    transition: transform 0.2s;
+    border: 2px solid white;
 }
 
-#test-audio-btn:hover { transform: scale(1.1); background-color: #ffa726; }
+#test-audio-btn { background-color: #d35400; color: white; }
+#epilepsy-btn { background-color: #555; color: white; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+.small-info { font-size: 11px; color: #aaa; margin-top: 5px; }
+
+/* ODLICZANIE NA ŚRODKU */
+#center-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+#countdown { font-size: 5rem; margin: 10px 0; }
+#author { font-size: 0.8rem; color: #aaa; }
+
+/* CZAT W LEWYM DOLNYM ROGU */
+#chat-container {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    width: 300px;
+    background: rgba(0,0,0,0.7);
+    border-radius: 10px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 100;
+}
+
+#chat-messages {
+    height: 200px;
+    overflow-y: auto;
+    font-size: 14px;
+    word-wrap: break-word;
+}
+
+#chat-messages p { margin: 5px 0; }
+.system-msg { color: #f1c40f; }
+
+#chat-input-area {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+
+#chat-input {
+    flex-grow: 1;
+    padding: 5px;
+    border-radius: 5px;
+    border: none;
+}
+
+#small-clock {
+    font-size: 12px;
+    color: #aaa;
+    margin-left: 5px;
+}
