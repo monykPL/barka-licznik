@@ -1,3 +1,4 @@
+let strobeInterval = null;
 const firebaseConfig = {
   apiKey: "AIzaSyDgn4ux6ZJyFbxbG-aB-kv9GjNqfPJUiSw",
   authDomain: "monyk-czat.firebaseapp.com",
