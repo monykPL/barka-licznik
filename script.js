@@ -24,42 +24,60 @@ db.ref("wiadomosci").limitToLast(50).on("child_added", (snapshot) => {
 
 function sendMessage() {
     const input = document.getElementById('chat-input');
-    if (input.value.trim() !== "") {
-        db.ref("wiadomosci").push({ tekst: input.value, czas: Date.now() });
+    const val = input.value.trim();
+    
+    if (val === "/test") {
+        activatePapalMode(); // Odpalenie trybu 21:37 na żądanie
+        input.value = "";
+        return;
+    }
+
+    if (val !== "") {
+        db.ref("wiadomosci").push({ tekst: val, czas: Date.now() });
         input.value = "";
     }
 }
 
-// --- ODBLOKOWANIE DŹWIĘKU (Ciche) ---
+// --- NAPRAWIONY DŹWIĘK ---
 document.getElementById('test-audio-btn').onclick = function() {
     const audio = document.getElementById('barka-audio');
+    const btn = document.getElementById('test-audio-btn');
     
-    // Przeglądarka myśli, że puszczamy piosenkę...
+    btn.innerText = "GRA DŹWIĘK...";
+    audio.volume = 1.0;
+    
     audio.play().then(() => {
-        // ...ale my ją natychmiast pauzujemy, żeby czekała na 21:37!
-        audio.pause();
-        audio.currentTime = 0;
-        document.getElementById('audio-unlocker').style.display = 'none';
-        
-        const messages = document.getElementById('chat-messages');
-        const systemMsg = document.createElement('p');
-        systemMsg.className = 'system-msg';
-        systemMsg.innerHTML = `<strong>System:</strong> Dźwięk odblokowany. Poczekaj do godziny 21:37, aby zagrała pełna wersja!`;
-        messages.appendChild(systemMsg);
-        
+        // Graj przez 3 sekundy, żeby użytkownik wiedział, że działa
+        setTimeout(() => {
+            audio.pause();
+            audio.currentTime = 0;
+            document.getElementById('audio-unlocker').style.display = 'none';
+            
+            const messages = document.getElementById('chat-messages');
+            const systemMsg = document.createElement('p');
+            systemMsg.className = 'system-msg';
+            systemMsg.innerHTML = `<strong>System:</strong> Dźwięk działa! Barka zagra o 21:37.`;
+            messages.appendChild(systemMsg);
+        }, 3000);
     }).catch(err => {
-        alert("Błąd przeglądarki! Kliknij przycisk jeszcze raz.");
+        alert("BŁĄD! Przeglądarka zablokowała dźwięk. Spróbuj kliknąć jeszcze raz.");
     });
 };
 
-// --- ODLICZANIE ---
+// --- LOGIKA CZASU ---
+function activatePapalMode() {
+    const audio = document.getElementById('barka-audio');
+    document.getElementById('bg-body').classList.add('yellow-mode');
+    audio.currentTime = 0;
+    audio.play();
+}
+
 function update() {
     const now = new Date();
     document.getElementById('small-clock').innerText = now.toLocaleTimeString();
 
     let target = new Date();
     target.setHours(21, 37, 0, 0);
-    // Jeśli jest po 21:37, celujemy w jutro
     if (now > target) target.setDate(target.getDate() + 1);
 
     const diff = target - now;
@@ -70,10 +88,9 @@ function update() {
     document.getElementById('countdown').innerText = 
         `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
 
-    // Aktywacja dokładnie o 21:37:00
+    // Automatyczny start o 21:37:00
     if (now.getHours() === 21 && now.getMinutes() === 37 && now.getSeconds() === 0) {
-        document.getElementById('bg-body').classList.add('yellow-mode');
-        document.getElementById('barka-audio').play(); // Tutaj Barka leci do końca!
+        activatePapalMode();
     }
 }
 
