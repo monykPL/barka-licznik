@@ -11,116 +11,39 @@ body {
     overflow: hidden;
 }
 
-/* Górne przyciski */
-.top-controls {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
-}
+.top-controls { position: absolute; top: 20px; right: 20px; display: flex; gap: 10px; }
+.sound-section { display: flex; flex-direction: column; align-items: center; }
+.orange-btn { background-color: #d35400; color: white; border: 1px solid white; padding: 10px 15px; font-weight: bold; cursor: pointer; border-radius: 5px; }
+.grey-btn { background-color: #495057; color: white; border: 1px solid white; padding: 10px 15px; cursor: pointer; border-radius: 5px; transition: 0.3s; }
+.sub-text { font-size: 11px; margin: 5px 0 0 0; color: #ced4da; }
 
-.sound-section {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
+#timer { font-size: 120px; font-weight: bold; }
 
-.orange-btn {
-    background-color: #d35400;
-    color: white;
-    border: 1px solid white;
-    padding: 10px 15px;
-    font-weight: bold;
-    cursor: pointer;
-    border-radius: 5px;
-}
-
-.grey-btn {
-    background-color: #495057;
-    color: white;
-    border: 1px solid white;
-    padding: 10px 15px;
-    cursor: pointer;
-    border-radius: 5px;
-}
-
-.sub-text {
-    font-size: 11px;
-    margin: 5px 0 0 0;
-    color: #ced4da;
-}
-
-/* Środek */
-.center-content {
-    text-align: center;
-}
-
-.timer-desc {
-    font-size: 18px;
-    margin-bottom: 10px;
-}
-
-#timer {
-    font-size: 120px;
-    font-weight: bold;
-}
-
-.footer-text {
-    font-size: 14px;
-    color: #adb5bd;
-    margin-top: 20px;
-}
-
-/* Czat (Lewy dół) */
 .chat-container {
     position: absolute;
     bottom: 20px;
     left: 20px;
     width: 300px;
-    background: rgba(0, 0, 0, 0.8);
-    border: 2px solid #333;
+    background: rgba(0, 0, 0, 0.85);
     border-radius: 10px;
     padding: 10px;
-    display: flex;
-    flex-direction: column;
 }
 
-#chat-box {
-    height: 200px;
-    overflow-y: auto;
-    font-size: 13px;
-    margin-bottom: 10px;
-    padding-right: 5px;
+#chat-box { height: 180px; overflow-y: auto; font-size: 13px; margin-bottom: 8px; }
+#user-nick { width: 93%; padding: 5px; margin-bottom: 5px; border-radius: 5px; border: none; background: #555; color: white; }
+.input-row { display: flex; gap: 5px; }
+#tekst { flex-grow: 1; padding: 5px; border-radius: 5px; border: none; }
+#send-btn { cursor: pointer; padding: 5px 10px; border-radius: 5px; border: none; font-weight: bold; }
+
+/* Overlay do flashbanga */
+#party-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    z-index: -1;
+    pointer-events: none;
+    transition: background-color 0.1s;
 }
 
-#chat-box div {
-    margin-bottom: 5px;
-}
-
-.input-row {
-    display: flex;
-    gap: 5px;
-}
-
-#tekst {
-    flex-grow: 1;
-    background: white;
-    border: none;
-    padding: 5px;
-    border-radius: 5px;
-}
-
-#send-btn {
-    background: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-/* Styl dla komunikatów SYSTEM/BOT */
-.system-msg { color: #f1c40f; font-weight: bold; }
-.bot-msg { color: #3498db; font-weight: bold; }
+.system-msg { color: #f1c40f; }
+.bot-msg { color: #3498db; }
