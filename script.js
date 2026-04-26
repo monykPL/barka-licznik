@@ -113,15 +113,19 @@ function activatePapalMode() {
     const audio = document.getElementById('barka-audio');
     const bg = document.getElementById('bg-body');
     
+    // Najpierw dodajemy żółte tło
     bg.classList.add('yellow-mode');
+    
+    // Jeśli opcja imprezy jest włączona, dodajemy miganie
     if (isPartyMode) {
+        console.log("Tryb imprezy aktywny!"); // Zobaczysz to w konsoli (F12)
         bg.classList.add('party-mode');
     }
     
     startConfetti();
     
     audio.currentTime = 0;
-    audio.play();
+    audio.play().catch(err => console.log("Błąd autostartu: ", err));
 }
 
 // --- LOGIKA CZASU ---
