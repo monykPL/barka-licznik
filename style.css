@@ -7,46 +7,22 @@ body {
     overflow: hidden; 
 }
 
-/* --- TŁO I EFEKTY --- */
-
-/* Standardowe tło (jeśli jakieś masz) */
-body {
-    transition: background-color 0.3s ease;
-}
-
-/* Tryb Papieski (Żółty) */
+/* WŁĄCZA ŻÓŁTE TŁO - zostaje nawet po wyłączeniu imprezy */
 .yellow-mode {
     background-color: #f1c40f !important;
     color: black !important;
 }
 
-/* Tryb Imprezy (Stroboskop) - Obsługa wszystkich przeglądarek */
+/* EFEKT MIGANIA (STROBOSKOP) */
 .party-mode {
-    -webkit-animation: flash 0.1s infinite !important; /* Chrome, Safari, Opera GX */
-    -moz-animation: flash 0.1s infinite !important;    /* Firefox */
-    -o-animation: flash 0.1s infinite !important;      /* Starsza Opera */
-    animation: flash 0.1s infinite !important;         /* Standard (Edge, modern browsers) */
-    
+    animation: flash 0.15s infinite !important;
     transition: none !important;
 }
 
-/* Definicja animacji z wymuszeniem koloru (!important w klatkach) */
-@-webkit-keyframes flash {
-    0% { background-color: #f1c40f !important; }
-    50% { background-color: #ffffff !important; }
-    100% { background-color: #f1c40f !important; }
-}
-
-@-moz-keyframes flash {
-    0% { background-color: #f1c40f !important; }
-    50% { background-color: #ffffff !important; }
-    100% { background-color: #f1c40f !important; }
-}
-
 @keyframes flash {
-    0% { background-color: #f1c40f !important; }
-    50% { background-color: #ffffff !important; }
-    100% { background-color: #f1c40f !important; }
+    0% { background-color: #f1c40f; }
+    50% { background-color: #ffffff; }
+    100% { background-color: #f1c40f; }
 }
 
 /* KONTROLKI W PRAWYM GÓRNYM ROGU */
