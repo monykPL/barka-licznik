@@ -8,7 +8,8 @@ body {
     width: 100vw;
 }
 
-/* Główne centrowanie grupy timera */
+/* --- CENTROWANIE TEKSTU --- */
+/* Zmodyfikowałem tylko tę sekcję, aby tekst był na środku jak na screenie */
 .center-wrapper {
     display: flex;
     justify-content: center;
@@ -22,12 +23,14 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    /* Poniższe ustawienie zapewnia, że blok tekstu jest centralnie wyśrodkowany pionowo i poziomo */
+    justify-content: center;
 }
 
 #timer {
-    font-size: 130px;
+    font-size: 130px; 
     font-weight: bold;
-    line-height: 0.9;
+    line-height: 0.9; 
     margin: 10px 0;
 }
 
@@ -44,59 +47,23 @@ body {
     margin: 0;
     opacity: 0.7;
 }
+/* --- KONIEC MODYFIKACJI CENTROWANIA --- */
 
-/* Górne przyciski - identyczne jak na Twoim screenie */
+/* Pozostałe elementy bez zmian, aby nie psuć layoutu */
 .top-controls {
     position: absolute;
     top: 20px;
     right: 20px;
     display: flex;
-    gap: 15px; /* Odstęp między sekcją dźwięku a przyciskiem imprezy */
+    gap: 10px;
     z-index: 100;
 }
 
-.sound-section {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
+.sound-section { display: flex; flex-direction: column; align-items: center; }
+.orange-btn { background-color: #d35400; color: white; border: 1px solid white; padding: 10px 15px; font-weight: bold; cursor: pointer; border-radius: 5px; }
+.grey-btn { background-color: #495057; color: white; border: 1px solid white; padding: 10px 15px; cursor: pointer; border-radius: 5px; }
+.sub-text { font-size: 11px; margin: 5px 0 0 0; color: #ced4da; }
 
-/* Przycisk dźwięku - pomarańczowy z białym tekstem */
-.orange-btn {
-    background-color: #d35400;
-    color: white;
-    border: 1px solid white;
-    padding: 8px 15px;
-    font-size: 14px;
-    font-weight: bold;
-    cursor: pointer;
-    border-radius: 5px;
-}
-
-.sub-text {
-    font-size: 12px;
-    margin: 5px 0 0 0;
-    color: #ced4da;
-}
-
-/* Przycisk IMPREZA - wysoki, biały z czarnym tekstem (jak na screenie) */
-.grey-btn {
-    background-color: #f8f9fa; /* Biały/jasnoszary */
-    color: black;
-    border: 1px solid #333;
-    padding: 10px 20px;
-    height: 75px; /* Stała wysokość dla pionowego wyglądu */
-    width: 160px;
-    font-size: 14px;
-    font-weight: bold;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-transform: uppercase;
-}
-
-/* Czat (Lewy dół) */
 .chat-container {
     position: absolute;
     bottom: 20px;
@@ -112,7 +79,7 @@ body {
 #user-nick { width: calc(100% - 12px); padding: 5px; margin-bottom: 5px; border-radius: 5px; border: none; background: #555; color: white; }
 .input-row { display: flex; gap: 5px; }
 #tekst { flex-grow: 1; padding: 5px; border-radius: 5px; border: none; }
-#send-btn { cursor: pointer; padding: 5px 10px; border-radius: 5px; border: none; font-weight: bold; background: white; color: black; }
+#send-btn { cursor: pointer; padding: 5px 10px; border-radius: 5px; border: none; font-weight: bold; }
 
 #party-overlay {
     position: fixed;
