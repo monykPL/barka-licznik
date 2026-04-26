@@ -2,7 +2,6 @@ let strobeInterval = null;
 let confettiInterval = null;
 let isPartyMode = false;
 
-// KONFIGURACJA FIREBASE
 const firebaseConfig = {
     apiKey: "AIzaSyDgn4ux6ZJyFbxbG-aB-kv9GjNqfPJUiSw",
     authDomain: "monyk-czat.firebaseapp.com",
@@ -16,54 +15,60 @@ const firebaseConfig = {
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// FUNKCJA EFEKTÓW
+// --- NAPRAWIONA FUNKCJA EFEKTÓW ---
 function startBarkaEffect() {
+    stopBarkaEffect(); // Najpierw czyścimy wszystko, żeby uniknąć nakładania się
+
     const audio = document.getElementById('barka-audio');
     let overlay = document.getElementById('party-overlay');
-    
     if (!overlay) {
         overlay = document.createElement('div');
         overlay.id = 'party-overlay';
-        overlay.style = "position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:-1;pointer-events:none;";
         document.body.appendChild(overlay);
     }
 
-    overlay.style.backgroundColor = "#f1c40f";
-
     if (isPartyMode) {
-        if (strobeInterval) clearInterval(strobeInterval);
         let flash = false;
         strobeInterval = setInterval(() => {
             overlay.style.backgroundColor = flash ? "#ffffff" : "#f1c40f";
             flash = !flash;
         }, 100);
+    } else {
+        overlay.style.backgroundColor = "#f1c40f";
     }
 
-    if (confettiInterval) clearInterval(confettiInterval);
     confettiInterval = setInterval(() => {
-        confetti({ particleCount: 5, origin: { y: 1 } });
-    }, 300);
+        confetti({ particleCount: 7, spread: 60, origin: { y: 0.9 } });
+    }, 250);
 
     if (audio) {
         audio.currentTime = 0;
-        audio.play().catch(() => console.log("Wymagana interakcja dla dźwięku"));
+        audio.play().catch(() => console.log("Interakcja wymagana do audio"));
     }
 }
 
 function stopBarkaEffect() {
-    if (strobeInterval) clearInterval(strobeInterval);
-    if (confettiInterval) clearInterval(confettiInterval);
+    clearInterval(strobeInterval);
+    clearInterval(confettiInterval);
+    strobeInterval = null;
+    confettiInterval = null;
     const overlay = document.getElementById('party-overlay');
     if (overlay) overlay.style.backgroundColor = "transparent";
 }
 
-// PRZYCISKI
+// --- LOGIKA PRZYCISKÓW ---
 window.toggleParty = function() {
     isPartyMode = !isPartyMode;
     const btn = document.getElementById("party-btn");
     btn.innerText = `IMPREZA: ${isPartyMode ? "WŁĄCZONA" : "WYŁĄCZONA"}`;
     btn.style.backgroundColor = isPartyMode ? "#2ecc71" : "#495057";
-    if (!isPartyMode) stopBarkaEffect();
+    
+    // Jeśli wyłączasz w trakcie trwania efektów, od razu przestań migać
+    if (!isPartyMode) {
+        clearInterval(strobeInterval);
+        const overlay = document.getElementById('party-overlay');
+        if (overlay) overlay.style.backgroundColor = "#f1c40f"; 
+    }
 };
 
 window.checkSound = function() {
@@ -73,14 +78,17 @@ window.checkSound = function() {
     setTimeout(() => audio.pause(), 3000);
 };
 
-// CZAT
+// --- CZAT ---
 window.sendMsg = function() {
+    const nickInput = document.getElementById("user-nick");
     const tekstInput = document.getElementById("tekst");
-    const tekst = tekstInput.value;
+    const nick = nickInput.value.trim() || "Anonim";
+    const tekst = tekstInput.value.trim();
+
     if (!tekst) return;
 
     db.ref("wiadomosci").push({
-        autor: "Anonim", // Możesz zmienić na pobieranie z prompta
+        autor: nick,
         tekst: tekst,
         czas: Date.now()
     });
@@ -90,22 +98,21 @@ window.sendMsg = function() {
 db.ref("wiadomosci").limitToLast(20).on("child_added", (snapshot) => {
     const dane = snapshot.val();
     const chatBox = document.getElementById("chat-box");
-    
     const msg = document.createElement("div");
+    
     if(dane.autor === "SYSTEM") msg.className = "system-msg";
-    if(dane.autor === "BOT") msg.className = "bot-msg";
+    else if(dane.autor === "BOT") msg.className = "bot-msg";
     
     msg.innerHTML = `<b>${dane.autor}:</b> ${dane.tekst}`;
     chatBox.appendChild(msg);
     chatBox.scrollTop = chatBox.scrollHeight;
 
-    // Obsługa /test
     if (dane.tekst === "/test" && (Date.now() - dane.czas < 5000)) {
         startBarkaEffect();
     }
 });
 
-// TIMER
+// --- TIMER ---
 function updateTimer() {
     const now = new Date();
     const polandTime = new Date(now.toLocaleString("en-US", {timeZone: "Europe/Warsaw"}));
