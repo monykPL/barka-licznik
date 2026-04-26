@@ -9,21 +9,20 @@ body {
 
 /* WŁĄCZA ŻÓŁTE TŁO O 21:37 */
 .yellow-mode {
-    background-color: #f1c40f !important;
+    background-color: #f1c40f; /* USUNĄŁEM !important */
     color: black;
 }
 
 /* EFEKT MIGANIA (STROBOSKOP) */
 .party-mode {
-    animation: flash 0.15s infinite !important;
-    -webkit-animation: flash 0.15s infinite !important;
-    transition: none !important; /* Wyłącza opóźnienia, żeby miganie było ostre */
+    animation: flash 0.15s infinite; /* USUNĄŁEM !important */
+    transition: none; 
 }
 
 @keyframes flash {
-    0% { background-color: #f1c40f !important; }
-    50% { background-color: #ffffff !important; }
-    100% { background-color: #f1c40f !important; }
+    0% { background-color: #f1c40f; }
+    50% { background-color: #ffffff; }
+    100% { background-color: #f1c40f; }
 }
 
 /* KONTROLKI W PRAWYM GÓRNYM ROGU */
