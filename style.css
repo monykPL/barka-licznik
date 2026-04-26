@@ -4,11 +4,10 @@ body {
     color: white;
     font-family: Arial, sans-serif;
     margin: 0;
-    overflow: hidden;
-    transition: background-color 0.3s ease; /* Płynne przejście na żółty */
+    overflow: hidden; 
 }
 
-/* ŻÓŁTE TŁO (BEZ MIGANIA) */
+/* WŁĄCZA ŻÓŁTE TŁO O 21:37 */
 .yellow-mode {
     background-color: #f1c40f !important;
     color: black;
@@ -17,13 +16,14 @@ body {
 /* EFEKT MIGANIA (STROBOSKOP) */
 .party-mode {
     animation: flash 0.15s infinite !important;
-    transition: none !important;
+    -webkit-animation: flash 0.15s infinite !important;
+    transition: none !important; /* Wyłącza opóźnienia, żeby miganie było ostre */
 }
 
 @keyframes flash {
-    0% { background-color: #f1c40f; }
-    50% { background-color: #ffffff; }
-    100% { background-color: #f1c40f; }
+    0% { background-color: #f1c40f !important; }
+    50% { background-color: #ffffff !important; }
+    100% { background-color: #f1c40f !important; }
 }
 
 /* KONTROLKI W PRAWYM GÓRNYM ROGU */
