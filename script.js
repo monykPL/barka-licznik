@@ -76,18 +76,31 @@ function activatePapalMode() {
     const audio = document.getElementById('barka-audio');
     const bg = document.getElementById('bg-body');
     
-    // 1. Zawsze dodaj żółte tło
-    bg.classList.add('yellow-mode');
-    
-    // 2. Jeśli impreza jest ON, dodaj miganie
-    if (isPartyMode) bg.classList.add('party-mode');
-    
-    // 3. Wyślij wiadomość systemową
+    // Zawsze włączamy żółte tło
+    bg.style.backgroundColor = "#f1c40f";
+
+    // Jeśli tryb imprezy jest włączony, uruchamiamy "ręczne" miganie
+    if (isPartyMode) {
+        let isWhite = false;
+        // Czyścimy stary interval, jeśli jakiś był
+        if (strobeInterval) clearInterval(strobeInterval); 
+        
+        strobeInterval = setInterval(() => {
+            bg.style.setProperty('background-color', isWhite ? '#f1c40f' : '#ffffff', 'important');
+            isWhite = !isWhite;
+        }, 100); // 100ms = bardzo szybkie miganie
+    }
+
+    // Wiadomość na czat
     db.ref("wiadomosci").push({
         autor: "SYSTEM",
-        tekst: "Wybiła godzina 21:37! 🚣‍♂️",
+        tekst: "Wybiła 21:37! Tryb Imprezy: " + (isPartyMode ? "ON ⚡" : "OFF"),
         czas: Date.now()
     });
+
+    audio.currentTime = 0;
+    audio.play();
+}
 
     // 4. Konfetti
     confettiInterval = setInterval(() => {
