@@ -17,7 +17,7 @@ const firebaseConfig = {
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// --- ZARZĄDZANIE STROBOSKOPEM ---
+// --- EFEKTY WIZUALNE ---
 function updateStrobe() {
     clearInterval(strobeInterval);
     const overlay = document.getElementById('party-overlay');
@@ -34,13 +34,11 @@ function updateStrobe() {
     }
 }
 
-// --- GŁÓWNA FUNKCJA EFEKTÓW ---
 function startBarkaEffect(startTimeSeconds = 0) {
     if (isEffectRunning && startTimeSeconds === 0) return; 
     
     isEffectRunning = true;
     const audio = document.getElementById('barka-audio');
-    
     let overlay = document.getElementById('party-overlay');
     if (!overlay) {
         overlay = document.createElement('div');
@@ -73,15 +71,13 @@ function stopBarkaEffect() {
     if (overlay) overlay.style.backgroundColor = "transparent";
 }
 
-// --- SYNCHRONIZACJA DLA SPÓŹNIALSKICH ---
+// --- SYNCHRONIZACJA BARKIEGO ---
 db.ref("lastTrigger").on("value", (snapshot) => {
     const triggerTime = snapshot.val();
     if (!triggerTime) return;
-
     const now = Date.now();
     const diff = (now - triggerTime) / 1000;
-
-    if (diff > 0 && diff < 170) { // Jeśli Barka zaczęła się mniej niż 170s temu
+    if (diff > 0 && diff < 170) {
         startBarkaEffect(diff);
     }
 });
@@ -92,8 +88,6 @@ window.toggleParty = function() {
     const btn = document.getElementById("party-btn");
     btn.innerText = `IMPREZA: ${isPartyMode ? "WŁĄCZONA" : "WYŁĄCZONA"}`;
     btn.style.backgroundColor = isPartyMode ? "#2ecc71" : "#495057";
-    
-    // Kluczowa poprawka: aktualizuj miganie natychmiast
     updateStrobe();
 };
 
@@ -104,6 +98,7 @@ window.checkSound = function() {
     setTimeout(() => audio.pause(), 3000);
 };
 
+// --- CZAT I AUTOMATYCZNE CZYSZCZENIE ---
 window.sendMsg = function() {
     const tekstInput = document.getElementById("tekst");
     const tekst = tekstInput.value.trim();
@@ -122,6 +117,7 @@ window.sendMsg = function() {
     tekstInput.value = "";
 };
 
+// Nasłuchiwanie nowych wiadomości
 db.ref("wiadomosci").limitToLast(20).on("child_added", (snapshot) => {
     const dane = snapshot.val();
     const chatBox = document.getElementById("chat-box");
@@ -132,19 +128,42 @@ db.ref("wiadomosci").limitToLast(20).on("child_added", (snapshot) => {
     chatBox.scrollTop = chatBox.scrollHeight;
 });
 
+// Nasłuchiwanie czyszczenia czatu (usuwa tekst z ekranu u wszystkich)
+db.ref("wiadomosci").on("value", (snapshot) => {
+    if (!snapshot.exists()) {
+        document.getElementById("chat-box").innerHTML = "";
+    }
+});
+
+// --- TIMER I LOGIKA SYSTEMOWA ---
 function updateTimer() {
     const now = new Date();
     const polandTime = new Date(now.toLocaleString("en-US", {timeZone: "Europe/Warsaw"}));
+    
+    // 1. Sprawdzenie czyszczenia czatu co godzinę
+    const currentHour = polandTime.getHours();
+    db.ref("lastCleanup").once("value", (snapshot) => {
+        const lastHour = snapshot.val();
+        // Jeśli godzina w bazie jest inna niż aktualna, czyść wiadomości
+        if (lastHour !== null && lastHour !== currentHour) {
+            db.ref("wiadomosci").remove();
+            db.ref("lastCleanup").set(currentHour);
+        } else if (lastHour === null) {
+            db.ref("lastCleanup").set(currentHour);
+        }
+    });
+
+    // 2. Logika odliczania do 21:37
     let target = new Date(polandTime);
     target.setHours(21, 37, 0, 0);
-
     if (polandTime > target) target.setDate(target.getDate() + 1);
+    
     const diff = target - polandTime;
-
     const h = Math.floor(diff / 3600000);
     const m = Math.floor((diff % 3600000) / 60000);
     const s = Math.floor((diff % 60000) / 1000);
 
+    // Automatyczny start Barki o 21:37
     if (h === 0 && m === 0 && s === 0 && !hasTriggeredToday) {
         hasTriggeredToday = true;
         db.ref("lastTrigger").set(Date.now());
@@ -154,5 +173,6 @@ function updateTimer() {
     document.getElementById("timer").innerText = 
         `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
+
 setInterval(updateTimer, 1000);
 document.getElementById('barka-audio').onended = stopBarkaEffect;
