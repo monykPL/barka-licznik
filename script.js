@@ -106,6 +106,12 @@ window.sendMsg = function() {
 
     if (tekst === "/test") {
         db.ref("lastTrigger").set(Date.now());
+        // System wysyła informację o godzinie przy teście
+        db.ref("wiadomosci").push({
+            autor: "SYSTEM",
+            tekst: "właśnie wybiła godzina 21:37🚣",
+            czas: Date.now()
+        });
     } else {
         const nickInput = document.getElementById("user-nick");
         db.ref("wiadomosci").push({
@@ -117,9 +123,12 @@ window.sendMsg = function() {
     tekstInput.value = "";
 };
 
-// Nasłuchiwanie nowych wiadomości
 db.ref("wiadomosci").limitToLast(20).on("child_added", (snapshot) => {
     const dane = snapshot.val();
+    
+    // Jeśli wiadomość to czyste "/test", nie wyświetlaj jej
+    if (dane.tekst === "/test") return;
+
     const chatBox = document.getElementById("chat-box");
     const msg = document.createElement("div");
     if(dane.autor === "SYSTEM") msg.style.color = "#f1c40f";
@@ -128,7 +137,6 @@ db.ref("wiadomosci").limitToLast(20).on("child_added", (snapshot) => {
     chatBox.scrollTop = chatBox.scrollHeight;
 });
 
-// Nasłuchiwanie czyszczenia czatu (usuwa tekst z ekranu u wszystkich)
 db.ref("wiadomosci").on("value", (snapshot) => {
     if (!snapshot.exists()) {
         document.getElementById("chat-box").innerHTML = "";
@@ -140,11 +148,9 @@ function updateTimer() {
     const now = new Date();
     const polandTime = new Date(now.toLocaleString("en-US", {timeZone: "Europe/Warsaw"}));
     
-    // 1. Sprawdzenie czyszczenia czatu co godzinę
     const currentHour = polandTime.getHours();
     db.ref("lastCleanup").once("value", (snapshot) => {
         const lastHour = snapshot.val();
-        // Jeśli godzina w bazie jest inna niż aktualna, czyść wiadomości
         if (lastHour !== null && lastHour !== currentHour) {
             db.ref("wiadomosci").remove();
             db.ref("lastCleanup").set(currentHour);
@@ -153,7 +159,6 @@ function updateTimer() {
         }
     });
 
-    // 2. Logika odliczania do 21:37
     let target = new Date(polandTime);
     target.setHours(21, 37, 0, 0);
     if (polandTime > target) target.setDate(target.getDate() + 1);
@@ -163,10 +168,16 @@ function updateTimer() {
     const m = Math.floor((diff % 3600000) / 60000);
     const s = Math.floor((diff % 60000) / 1000);
 
-    // Automatyczny start Barki o 21:37
+    // Automatyczny start Barki o 21:37:00
     if (h === 0 && m === 0 && s === 0 && !hasTriggeredToday) {
         hasTriggeredToday = true;
         db.ref("lastTrigger").set(Date.now());
+        // System automatycznie ogłasza godzinę
+        db.ref("wiadomosci").push({
+            autor: "SYSTEM",
+            tekst: "właśnie wybiła godzina 21:37🚣",
+            czas: Date.now()
+        });
     }
     if (m > 1) hasTriggeredToday = false;
 
