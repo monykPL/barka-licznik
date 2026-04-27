@@ -1,7 +1,8 @@
 let strobeInterval = null;
 let confettiInterval = null;
 let isPartyMode = false;
-let hasTriggeredToday = false; // Zapobiega wielokrotnemu odpaleniu w tej samej minucie
+let isEffectRunning = false;
+let hasTriggeredToday = false;
 
 const firebaseConfig = {
     apiKey: "AIzaSyDgn4ux6ZJyFbxbG-aB-kv9GjNqfPJUiSw",
@@ -16,15 +17,11 @@ const firebaseConfig = {
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-function startBarkaEffect() {
-    stopBarkaEffect();
-    const audio = document.getElementById('barka-audio');
-    let overlay = document.getElementById('party-overlay');
-    if (!overlay) {
-        overlay = document.createElement('div');
-        overlay.id = 'party-overlay';
-        document.body.appendChild(overlay);
-    }
+// --- ZARZĄDZANIE STROBOSKOPEM ---
+function updateStrobe() {
+    clearInterval(strobeInterval);
+    const overlay = document.getElementById('party-overlay');
+    if (!overlay || !isEffectRunning) return;
 
     if (isPartyMode) {
         let flash = false;
@@ -35,19 +32,39 @@ function startBarkaEffect() {
     } else {
         overlay.style.backgroundColor = "#f1c40f";
     }
+}
 
-    confettiInterval = setInterval(() => {
-        confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0, y: 0.9 } });
-        confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1, y: 0.9 } });
-    }, 300);
+// --- GŁÓWNA FUNKCJA EFEKTÓW ---
+function startBarkaEffect(startTimeSeconds = 0) {
+    if (isEffectRunning && startTimeSeconds === 0) return; 
+    
+    isEffectRunning = true;
+    const audio = document.getElementById('barka-audio');
+    
+    let overlay = document.getElementById('party-overlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'party-overlay';
+        document.body.appendChild(overlay);
+    }
+
+    updateStrobe();
+
+    if (!confettiInterval) {
+        confettiInterval = setInterval(() => {
+            confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0, y: 0.9 } });
+            confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1, y: 0.9 } });
+        }, 300);
+    }
 
     if (audio) {
-        audio.currentTime = 0;
-        audio.play().catch(() => console.log("Wymagana interakcja użytkownika."));
+        audio.currentTime = startTimeSeconds;
+        audio.play().catch(() => console.log("Czekam na interakcję..."));
     }
 }
 
 function stopBarkaEffect() {
+    isEffectRunning = false;
     clearInterval(strobeInterval);
     clearInterval(confettiInterval);
     strobeInterval = null;
@@ -56,13 +73,28 @@ function stopBarkaEffect() {
     if (overlay) overlay.style.backgroundColor = "transparent";
 }
 
+// --- SYNCHRONIZACJA DLA SPÓŹNIALSKICH ---
+db.ref("lastTrigger").on("value", (snapshot) => {
+    const triggerTime = snapshot.val();
+    if (!triggerTime) return;
+
+    const now = Date.now();
+    const diff = (now - triggerTime) / 1000;
+
+    if (diff > 0 && diff < 170) { // Jeśli Barka zaczęła się mniej niż 170s temu
+        startBarkaEffect(diff);
+    }
+});
+
 window.toggleParty = function() {
     if (!isPartyMode) alert("OSTRZEŻENIE: Tryb imprezy może wywołać napad epilepsji.");
     isPartyMode = !isPartyMode;
     const btn = document.getElementById("party-btn");
     btn.innerText = `IMPREZA: ${isPartyMode ? "WŁĄCZONA" : "WYŁĄCZONA"}`;
     btn.style.backgroundColor = isPartyMode ? "#2ecc71" : "#495057";
-    if (!isPartyMode) stopBarkaEffect();
+    
+    // Kluczowa poprawka: aktualizuj miganie natychmiast
+    updateStrobe();
 };
 
 window.checkSound = function() {
@@ -72,29 +104,26 @@ window.checkSound = function() {
     setTimeout(() => audio.pause(), 3000);
 };
 
-// --- LOGIKA CZATU Z UKRYWANIEM /TEST ---
 window.sendMsg = function() {
-    const nickInput = document.getElementById("user-nick");
     const tekstInput = document.getElementById("tekst");
-    const nick = nickInput.value.trim() || "Anonim";
     const tekst = tekstInput.value.trim();
     if (!tekst) return;
 
-    db.ref("wiadomosci").push({ autor: nick, tekst: tekst, czas: Date.now() });
+    if (tekst === "/test") {
+        db.ref("lastTrigger").set(Date.now());
+    } else {
+        const nickInput = document.getElementById("user-nick");
+        db.ref("wiadomosci").push({
+            autor: nickInput.value.trim() || "Anonim",
+            tekst: tekst,
+            czas: Date.now()
+        });
+    }
     tekstInput.value = "";
 };
 
 db.ref("wiadomosci").limitToLast(20).on("child_added", (snapshot) => {
     const dane = snapshot.val();
-    
-    // Jeśli to /test, odpal efekty i ZAKOŃCZ (nie dodawaj do HTML)
-    if (dane.tekst === "/test") {
-        if (Date.now() - dane.czas < 10000) { // Tylko jeśli wiadomość jest świeża (max 10s)
-            startBarkaEffect();
-        }
-        return; 
-    }
-
     const chatBox = document.getElementById("chat-box");
     const msg = document.createElement("div");
     if(dane.autor === "SYSTEM") msg.style.color = "#f1c40f";
@@ -103,7 +132,6 @@ db.ref("wiadomosci").limitToLast(20).on("child_added", (snapshot) => {
     chatBox.scrollTop = chatBox.scrollHeight;
 });
 
-// --- TIMER I AUTOMATYCZNY SYSTEM ---
 function updateTimer() {
     const now = new Date();
     const polandTime = new Date(now.toLocaleString("en-US", {timeZone: "Europe/Warsaw"}));
@@ -113,18 +141,14 @@ function updateTimer() {
     if (polandTime > target) target.setDate(target.getDate() + 1);
     const diff = target - polandTime;
 
-    // AUTOMATYCZNE WYZWALANIE O 21:37:00
     const h = Math.floor(diff / 3600000);
     const m = Math.floor((diff % 3600000) / 60000);
     const s = Math.floor((diff % 60000) / 1000);
 
     if (h === 0 && m === 0 && s === 0 && !hasTriggeredToday) {
         hasTriggeredToday = true;
-        // System wysyła ukryte /test do bazy, by u każdego startło równo
-        db.ref("wiadomosci").push({ autor: "SYSTEM", tekst: "/test", czas: Date.now() });
+        db.ref("lastTrigger").set(Date.now());
     }
-
-    // Resetuj flage wyzwalacza po minucie, by zadziałało jutro
     if (m > 1) hasTriggeredToday = false;
 
     document.getElementById("timer").innerText = 
