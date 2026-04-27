@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="pl">
 <head>
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Barka 21:37 - monykPL</title>
@@ -20,17 +19,19 @@
         <button id="party-btn" class="grey-btn" onclick="toggleParty()">IMPREZA: WYŁĄCZONA</button>
     </div>
 
-    <div class="center-content">
-        <p class="timer-desc">Do godziny 21:37 pozostało:</p>
-        <div id="timer">00:00:00</div>
-        <p class="footer-text">made by: monykPL</p>
+    <div class="center-wrapper">
+        <div class="timer-container">
+            <p class="timer-desc">Do godziny 21:37 pozostało:</p>
+            <div id="timer">00:00:00</div>
+            <p class="footer-text">made by: monykPL</p>
+        </div>
     </div>
 
     <div class="chat-container">
         <div id="chat-box"></div>
         <input type="text" id="user-nick" placeholder="Twój Nick..." maxlength="15">
         <div class="input-row">
-            <input type="text" id="tekst" placeholder="Wiadomość (/test)...">
+            <input type="text" id="tekst" placeholder="Wiadomość...">
             <button id="send-btn" onclick="sendMsg()">Wyślij</button>
         </div>
     </div>
