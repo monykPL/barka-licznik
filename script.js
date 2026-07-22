@@ -5,13 +5,13 @@ let isEffectRunning = false;
 let hasTriggeredToday = false;
 
 const firebaseConfig = {
-    apiKey: "AIzaSyDgn4ux6ZJyFbxbG-aB-kv9GjNqfPJUiSw",
-    authDomain: "monyk-czat.firebaseapp.com",
+    apiKey: "AIzaSyDv_r8UXUclGECi0Kv5iuYHDhVZNfLaZkA",
+    authDomain: "barka-licznik.firebaseapp.com",
     databaseURL: "https://monyk-czat-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "monyk-czat",
-    storageBucket: "monyk-czat.firebasestorage.app",
-    messagingSenderId: "39641097299",
-    appId: "1:39641097299:web:aac07712b25e2b501652a6"
+    projectId: "barka-licznik",
+    storageBucket: "barka-licznik.firebasestorage.app",
+    messagingSenderId: "160517652127",
+    appId: "1:160517652127:web:f1c6966ea11a366683ecaa"
 };
 
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
