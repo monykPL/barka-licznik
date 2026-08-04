@@ -7,7 +7,7 @@ let hasTriggeredToday = false;
 const firebaseConfig = {
     apiKey: "AIzaSyDv_r8UXUclGECi0Kv5iuYHDhVZNfLaZkA",
     authDomain: "barka-licznik.firebaseapp.com",
-    databaseURL: "https://monyk-czat-default-rtdb.europe-west1.firebasedatabase.app",
+    databaseURL: "https://barka-licznik-default-rtdb.firebaseio.com",
     projectId: "barka-licznik",
     storageBucket: "barka-licznik.firebasestorage.app",
     messagingSenderId: "160517652127",
