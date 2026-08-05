@@ -4,6 +4,11 @@ let isPartyMode = false;
 let isEffectRunning = false;
 let hasTriggeredToday = false;
 
+let userMutedUntil = localStorage.getItem('userMutedUntil') ? parseInt(localStorage.getItem('userMutedUntil')) : 0;
+let messageTimestamps = [];
+
+let clickCount = 0;
+
 const firebaseConfig = {
     apiKey: "AIzaSyDv_r8UXUclGECi0Kv5iuYHDhVZNfLaZkA",
     authDomain: "barka-licznik.firebaseapp.com",
@@ -17,20 +22,56 @@ const firebaseConfig = {
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// --- EFEKTY WIZUALNE ---
+function clickCookie() {
+    clickCount++;
+    document.getElementById("click-count").innerText = `Punkty: ${clickCount}`;
+}
+
+function switchTab(tabId) {
+    document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+    
+    document.getElementById(tabId).classList.add('active');
+    event.target.classList.add('active');
+}
+
+function switchSettingsTab(setTabId) {
+    document.querySelectorAll('.settings-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.set-tab-btn').forEach(el => el.classList.remove('active'));
+    
+    document.getElementById(setTabId).classList.add('active');
+    event.target.classList.add('active');
+}
+
+function updateVisuals() {
+    const showChat = document.getElementById("toggle-chat").checked;
+    const showClock = document.getElementById("toggle-clock").checked;
+    const showSound = document.getElementById("toggle-sound").checked;
+    const showLasers = document.getElementById("toggle-lasers").checked;
+    const showSmoke = document.getElementById("toggle-smoke").checked;
+
+    document.getElementById("chat-section").style.display = showChat ? "block" : "none";
+    document.getElementById("center-timer-box").style.display = showClock ? "block" : "none";
+    document.getElementById("sound-section").style.display = showSound ? "flex" : "none";
+
+    document.getElementById("lasers-container").classList.toggle("hidden", !showLasers);
+    document.getElementById("smoke-container").classList.toggle("hidden", !showSmoke);
+}
+
 function updateStrobe() {
     clearInterval(strobeInterval);
     const overlay = document.getElementById('party-overlay');
+    const allowStrobe = document.getElementById("toggle-strobe").checked;
     if (!overlay || !isEffectRunning) return;
 
-    if (isPartyMode) {
+    if (isPartyMode && allowStrobe) {
         let flash = false;
         strobeInterval = setInterval(() => {
             overlay.style.backgroundColor = flash ? "#ffffff" : "#f1c40f";
             flash = !flash;
         }, 100);
     } else {
-        overlay.style.backgroundColor = "#f1c40f";
+        overlay.style.backgroundColor = "transparent";
     }
 }
 
@@ -48,7 +89,8 @@ function startBarkaEffect(startTimeSeconds = 0) {
 
     updateStrobe();
 
-    if (!confettiInterval) {
+    const allowConfetti = document.getElementById("toggle-confetti").checked;
+    if (!confettiInterval && allowConfetti) {
         confettiInterval = setInterval(() => {
             confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0, y: 0.9 } });
             confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1, y: 0.9 } });
@@ -71,7 +113,6 @@ function stopBarkaEffect() {
     if (overlay) overlay.style.backgroundColor = "transparent";
 }
 
-// --- SYNCHRONIZACJA BARKIEGO ---
 db.ref("lastTrigger").on("value", (snapshot) => {
     const triggerTime = snapshot.val();
     if (!triggerTime) return;
@@ -83,11 +124,13 @@ db.ref("lastTrigger").on("value", (snapshot) => {
 });
 
 window.toggleParty = function() {
-    if (!isPartyMode) alert("OSTRZEŻENIE: Tryb imprezy może wywołać napad epilepsji.");
+    alert("OSTRZEŻENIE: Tryb imprezy może wywołać napad epilepsji.");
     isPartyMode = !isPartyMode;
-    const btn = document.getElementById("party-btn");
-    btn.innerText = `IMPREZA: ${isPartyMode ? "WŁĄCZONA" : "WYŁĄCZONA"}`;
-    btn.style.backgroundColor = isPartyMode ? "#2ecc71" : "#495057";
+    const btn = document.getElementById("party-btn-visual");
+    if (btn) {
+        btn.innerText = `IMPREZA (STROBE): ${isPartyMode ? "WŁĄCZONA" : "WYŁĄCZONA"}`;
+        btn.style.backgroundColor = isPartyMode ? "#2ecc71" : "#495057";
+    }
     updateStrobe();
 };
 
@@ -98,15 +141,40 @@ window.checkSound = function() {
     setTimeout(() => audio.pause(), 3000);
 };
 
-// --- CZAT I AUTOMATYCZNE CZYSZCZENIE ---
 window.sendMsg = function() {
+    const now = Date.now();
+
+    if (now < userMutedUntil) {
+        const minsLeft = Math.ceil((userMutedUntil - now) / 60000);
+        alert(`Jesteś wyciszony jeszcze przez ${minsLeft} min!`);
+        return;
+    }
+
     const tekstInput = document.getElementById("tekst");
     const tekst = tekstInput.value.trim();
     if (!tekst) return;
 
+    const urlPattern = /(https?:\/\/|www\.|[a-zA-Z0-9-]+\.[a-zA-Z]{2,})/i;
+    if (urlPattern.test(tekst)) {
+        userMutedUntil = now + (10 * 60 * 1000);
+        localStorage.setItem('userMutedUntil', userMutedUntil);
+        alert("Wysyłanie linków jest zabronione! Zostałeś wyciszony na 10 minut.");
+        tekstInput.value = "";
+        return;
+    }
+
+    messageTimestamps = messageTimestamps.filter(t => now - t <= 2000);
+    messageTimestamps.push(now);
+    if (messageTimestamps.length >= 4) {
+        userMutedUntil = now + (5 * 60 * 1000);
+        localStorage.setItem('userMutedUntil', userMutedUntil);
+        alert("Wykryto spam (4 wiadomości w 2s)! Zostałeś wyciszony na 5 minut.");
+        tekstInput.value = "";
+        return;
+    }
+
     if (tekst === "/test") {
         db.ref("lastTrigger").set(Date.now());
-        // System wysyła informację o godzinie przy teście
         db.ref("wiadomosci").push({
             autor: "SYSTEM",
             tekst: "właśnie wybiła godzina 21:37🚣",
@@ -125,8 +193,6 @@ window.sendMsg = function() {
 
 db.ref("wiadomosci").limitToLast(20).on("child_added", (snapshot) => {
     const dane = snapshot.val();
-    
-    // Jeśli wiadomość to czyste "/test", nie wyświetlaj jej
     if (dane.tekst === "/test") return;
 
     const chatBox = document.getElementById("chat-box");
@@ -143,7 +209,6 @@ db.ref("wiadomosci").on("value", (snapshot) => {
     }
 });
 
-// --- TIMER I LOGIKA SYSTEMOWA ---
 function updateTimer() {
     const now = new Date();
     const polandTime = new Date(now.toLocaleString("en-US", {timeZone: "Europe/Warsaw"}));
@@ -168,11 +233,9 @@ function updateTimer() {
     const m = Math.floor((diff % 3600000) / 60000);
     const s = Math.floor((diff % 60000) / 1000);
 
-    // Automatyczny start Barki o 21:37:00
     if (h === 0 && m === 0 && s === 0 && !hasTriggeredToday) {
         hasTriggeredToday = true;
         db.ref("lastTrigger").set(Date.now());
-        // System automatycznie ogłasza godzinę
         db.ref("wiadomosci").push({
             autor: "SYSTEM",
             tekst: "właśnie wybiła godzina 21:37🚣",
