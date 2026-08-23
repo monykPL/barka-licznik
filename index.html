@@ -34,12 +34,6 @@
     <audio id="barka-audio" src="barka.mp3"></audio>
 
     <main id="main-view" class="view-section active">
-        
-        <div id="sound-section" class="top-right-controls">
-            <button id="sound-btn" onclick="checkSound()">KLIKNIJ, ABY SPRAWDZIĆ DŹWIĘK</button>
-            <span class="sound-subtext">(Musisz usłyszeć 3 sekundy Barki)</span>
-        </div>
-
         <div id="center-timer-box" class="center-box">
             <div id="title-section" class="timer-title">Do godziny 21:37 pozostało:</div>
             <div id="timer" class="timer-display">00:00:00</div>
@@ -65,10 +59,6 @@
                 <div id="click-count">Punkty: 0</div>
                 <button id="clicker-btn" onclick="clickCookie()">KLIKAJ!</button>
             </div>
-            <div class="upgrades-box">
-                <h3>Ulepszenia</h3>
-                <p class="coming-soon">Wkrótce</p>
-            </div>
         </div>
     </section>
 
@@ -81,49 +71,49 @@
             </div>
 
             <div id="set-visual" class="settings-content active">
-                <h3>Ustawienia Wizualne</h3>
-                <div class="party-setting-row">
-                    <button id="party-btn-visual" class="party-toggle-btn" onclick="toggleParty()">
-                        IMPREZA (STROBE): WYŁĄCZONA
-                    </button>
-                    <small>OSTRZEŻENIE: Tryb imprezy może wywołać napad epilepsji.</small>
+                <h3>Ustawienia Wizualne i Dźwięk</h3>
+                
+                <div class="sound-setting-box">
+                    <button id="sound-btn" onclick="checkSound()">KLIKNIJ, ABY SPRAWDZIĆ DŹWIĘK</button>
+                    <span class="sound-subtext">(Musisz usłyszeć 3 sekundy Barki)</span>
                 </div>
+
+                <div class="party-setting-row">
+                    <label class="toggle-row">
+                        <input type="checkbox" id="toggle-strobe" onchange="togglePartyCheckbox()">
+                        <b>Tryb Imprezowy (Strobe)</b>
+                    </label>
+                    <small class="warning-text">OSTRZEŻENIE: Tryb imprezy może wywołać napad epilepsji.</small>
+                </div>
+
                 <hr>
                 <label><input type="checkbox" id="toggle-chat" checked onchange="updateVisuals()"> Pokaż Czat</label><br>
-                <label><input type="checkbox" id="toggle-clock" checked onchange="updateVisuals()"> Pokaż Zegar i Odliczanie</label><br>
-                <label><input type="checkbox" id="toggle-sound" checked onchange="updateVisuals()"> Pokaż Przycisk testu dźwięku</label><br>
+                <label><input type="checkbox" id="toggle-clock" checked onchange="updateVisuals()"> Pokaż Zegar</label><br>
                 <label><input type="checkbox" id="toggle-confetti" checked onchange="updateVisuals()"> Konfetti o 21:37</label><br>
-                <label><input type="checkbox" id="toggle-strobe" checked onchange="updateVisuals()"> Zezwalaj na miganie ekranu</label><br>
                 <hr>
-                <label><input type="checkbox" id="toggle-lasers" onchange="updateVisuals()"> NEONOWE Lasery imprezowe</label><br>
-                <label><input type="checkbox" id="toggle-smoke" onchange="updateVisuals()"> Realistyczny dym po bokach</label>
+                <label><input type="checkbox" id="toggle-lasers" onchange="updateVisuals()"> NEONOWE Lasery</label><br>
+                <label><input type="checkbox" id="toggle-smoke" onchange="updateVisuals()"> Realistyczny dym</label>
             </div>
 
             <div id="set-info" class="settings-content">
-                <h3>Informacje</h3>
                 <div class="social-buttons">
                     <a href="https://github.com/monykPL/barka-licznik" target="_blank" class="info-btn github">
-                        <svg class="btn-icon" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
                             <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
-                        </svg>
-                        GitHub
+                        </svg> GitHub
                     </a>
                     <a href="https://www.youtube.com/@monyk_PL" target="_blank" class="info-btn youtube">
-                        <svg class="btn-icon" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
                             <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                        </svg>
-                        YouTube
+                        </svg> YouTube
                     </a>
                 </div>
-                <p class="disclaimer">To jest w celach humorystycznych, to nie ma być traktowane realnie.</p>
             </div>
 
             <div id="set-rules" class="settings-content">
-                <h3>Regulamin Korzystania</h3>
                 <ol>
-                    <li><b>Nie wysyłać linków</b> — wysłanie jakiegokolwiek linku skutkuje automatycznym usunięciem wiadomości oraz <b>karą braku pisania na 10 minut</b>.</li>
-                    <li><b>Nie obrażać / nie wyzywać</b> innych użytkowników na czacie.</li>
-                    <li><b>Nie spamić</b> — wysłanie 4 wiadomości w ciągu 2 sekund skutkuje <b>blokadą pisania na 5 minut</b>.</li>
+                    <li>Zakaz wysyłania linków - auto kara 10 min.</li>
+                    <li>Zakaz spamu - 4 wiadomości w 2s to kara 5 min.</li>
                 </ol>
             </div>
         </div>
